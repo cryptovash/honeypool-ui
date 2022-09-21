@@ -1,0 +1,16 @@
+{
+  "short_name": "Honey Pool",
+  "name": "Honey Pool",
+  "description": "Deposit to save & win.",
+  "icons": [
+    {
+      "src": "/pool-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/",
+  "display": "fullscreen",
+  "scope": "/",
+  "theme_color": "#000"
+}
