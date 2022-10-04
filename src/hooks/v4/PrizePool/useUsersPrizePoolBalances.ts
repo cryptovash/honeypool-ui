@@ -1,10 +1,10 @@
+import { PrizePoolTokens, usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
 import { Token, TokenWithUsdBalance } from '@pooltogether/hooks'
-import { PrizePool } from '@pooltogether/v4-client-js'
 import { toScaledUsdBigNumber } from '@pooltogether/utilities'
+import { PrizePool } from '@pooltogether/v4-client-js'
+import { getAmountFromBigNumber } from '@utils/getAmountFromBigNumber'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
-import { PrizePoolTokens, usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
-import { getAmountFromBigNumber } from '@utils/getAmountFromBigNumber'
 
 export interface UsersPrizePoolBalances {
   ticket: TokenWithUsdBalance
@@ -19,7 +19,7 @@ export const useUsersPrizePoolBalances = (usersAddress: string, prizePool: Prize
   const enabled = Boolean(prizePool) && Boolean(usersAddress) && isFetched
 
   return useQuery(
-    [USERS_PRIZE_POOL_BALANCES_QUERY_KEY, prizePool.id(), usersAddress],
+    [USERS_PRIZE_POOL_BALANCES_QUERY_KEY, prizePool?.id(), usersAddress],
     async () => getUsersPrizePoolBalances(prizePool, usersAddress, tokens),
     {
       enabled

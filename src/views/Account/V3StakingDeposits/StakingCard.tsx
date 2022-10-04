@@ -1,14 +1,13 @@
-import { Amount, Token, TokenWithBalance, TokenWithUsdBalance } from '@pooltogether/hooks'
-import FeatherIcon from 'feather-icons-react'
-import { ThemedClipSpinner, TokenIcon } from '@pooltogether/react-components'
-import { displayPercentage } from '@pooltogether/utilities'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-
 import { VAPRTooltip } from '@components/VAPRTooltip'
 import { V3PrizePoolBalances } from '@hooks/v3/useAllUsersV3Balances'
-import { StakingBottomSheet } from './StakingBottomSheet'
+import { Amount, Token, TokenWithBalance, TokenWithUsdBalance } from '@pooltogether/hooks'
+import { ThemedClipSpinner, TokenIcon } from '@pooltogether/react-components'
+import { displayPercentage } from '@pooltogether/utilities'
 import classNames from 'classnames'
+import FeatherIcon from 'feather-icons-react'
+import { useTranslation } from 'next-i18next'
+import { useState } from 'react'
+import { StakingBottomSheet } from './StakingBottomSheet'
 
 interface StakingCardProps {
   chainId: number
@@ -97,14 +96,14 @@ interface StakingCardTitleProps {
 }
 
 const StakingCardTitle = (props: StakingCardTitleProps) => {
-  const { tokenIcon, poolEmoji } = props
+  const { tokenLabel, tokenIcon, poolEmoji } = props
   const { t } = useTranslation()
   return (
     <div className='flex w-full justify-between'>
       <div className='flex flex-col xs:flex-row xs:items-center'>
         {tokenIcon}
         <span className='xs:ml-2 font-semibold text-sm'>
-          {('Stake')} {('HNYP')}
+          {t('stake')} {tokenLabel}
         </span>
       </div>
       <div className='text-xl' style={{ textShadow: '2px 2px 0px rgba(50, 10, 100, 0.3)' }}>
@@ -142,7 +141,7 @@ const ManageState = (props: ManageStateProps) => {
           content={<TokenAndAmount chainId={chainId} token={ticket} amount={ticket} />}
         />
         <ListItem
-          title={t('Rewards')}
+          title={t('rewards')}
           content={
             <TokenAndAmount
               chainId={chainId}
@@ -256,7 +255,7 @@ const DepositState = (props: DepositStateProps) => {
               token={tokenFaucetRewards}
               isFetched={isTokenFaucetRewardsFetched}
             />
-            <span>{t('Earn')}</span>
+            <span>{t('earn')}</span>
             <VAPROrLoading vapr={vapr} isFetched={isTokenFaucetDataFetched} />
             <VAPRTooltip />
           </div>

@@ -1,15 +1,14 @@
-import React from 'react'
-import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
-import { PrizeDistributor, PrizePool } from '@pooltogether/v4-client-js'
-
 import { PagePadding } from '@components/Layout/PagePadding'
 import { SelectAppChainIdModal } from '@components/SelectAppChainIdModal'
-import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
-import { usePrizePoolBySelectedChainId } from '@hooks/v4/PrizePool/usePrizePoolBySelectedChainId'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
-import { usePrizeDistributorBySelectedChainId } from '@hooks/v4/PrizeDistributor/usePrizeDistributorBySelectedChainId'
 import { useLockedDrawIdsWatcher } from '@hooks/v4/PrizeDistributor/useLockedDrawIdsWatcher'
+import { usePrizeDistributorBySelectedChainId } from '@hooks/v4/PrizeDistributor/usePrizeDistributorBySelectedChainId'
+import { usePrizePoolBySelectedChainId } from '@hooks/v4/PrizePool/usePrizePoolBySelectedChainId'
+import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
+import { PrizeDistributor, PrizePool } from '@pooltogether/v4-client-js'
+import { useUsersAddress } from '@pooltogether/wallet-connection'
+import classNames from 'classnames'
+import { useTranslation } from 'next-i18next'
+import React from 'react'
 import { MultiDrawsCard } from './MultiDrawsCard'
 import { LoadingCard } from './MultiDrawsCard/LoadingCard'
 import { LockedDrawsCard } from './MultiDrawsCard/LockedDrawsCard'
@@ -89,7 +88,7 @@ const CheckForPrizesOnNetwork = (props: {
         className
       )}
     >
-      <span className='uppercase text-pt-purple-dark dark:text-pt-purple-light'>
+      <span className='uppercase text-pt-purple-dark text-opacity-60 dark:text-pt-purple-lighter'>
         {t('prizesOn', 'Prizes on')}
       </span>
       <SelectAppChainIdModal className='network-dropdown ml-1 xs:ml-2' />

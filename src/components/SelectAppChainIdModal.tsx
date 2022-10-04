@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
-import classNames from 'classnames'
-import FeatherIcon from 'feather-icons-react'
-import { useTranslation } from 'react-i18next'
-import { BottomSheet, NetworkIcon } from '@pooltogether/react-components'
-import { getNetworkNiceNameByChainId } from '@pooltogether/utilities'
-
 import { useSelectedChainId } from '@hooks/useSelectedChainId'
 import { useV4ChainIds } from '@hooks/useV4ChainIds'
 import { useChainActiveRewards } from '@hooks/v4/TwabRewards/useChainActiveRewards'
+import { BottomSheet, NetworkIcon } from '@pooltogether/react-components'
+import { getNetworkNiceNameByChainId } from '@pooltogether/utilities'
+import classNames from 'classnames'
+import FeatherIcon from 'feather-icons-react'
+import { useTranslation } from 'next-i18next'
+import React, { useState } from 'react'
 
 interface SelectAppChainIdModalProps {
   className?: string
@@ -39,12 +38,8 @@ export const SelectAppChainIdModal = (props: SelectAppChainIdModalProps) => {
         <FeatherIcon icon='chevron-down' className='ml-2' />
       </button>
       <BottomSheet open={isOpen} onDismiss={() => setIsOpen(false)} maxWidthClassName='max-w-md'>
-        <h6 className='text-center uppercase text-sm mb-3'>{t('Choose A Network')}</h6>
-        <p className='max-w-sm mx-auto text-xs mb-12 text-center'>
-          {t(
-            'All networks deposit into the same prize pool and have the same chances of winning prizes. Pick your favourite and good luck!'
-          )}
-        </p>
+        <h6 className='text-center uppercase text-sm mb-3'>{t('chooseANetwork')}</h6>
+        <p className='max-w-sm mx-auto text-xs mb-12 text-center'>{t('v4NetworkSelectPrompt')}</p>
 
         <ul className='space-y-2 mx-auto max-w-sm'>
           {supportedChainIds.map((chainId) => (
@@ -85,7 +80,7 @@ const NetworkItem = (props: {
           onDismiss()
         }}
         className={classNames(
-          'bg-pt-purple-lighter dark:bg-pt-purple-lighter rounded-lg px-4 p-2 flex items-center justify-between w-full transition-colors',
+          'bg-pt-purple-lighter dark:bg-pt-purple-darker rounded-lg px-4 p-2 flex items-center justify-between w-full transition-colors',
           'border hover:border-highlight-1',
           {
             'border-default': isSelected,
@@ -122,8 +117,8 @@ const RewardsLabel = (props) => {
   }
 
   return (
-    <div className='flex items-center uppercase text-xxs font-averta-bold bg-pt-teal dark:bg-pt-teal px-3 py-1 bg-flashy rounded-full text-pt-purple-dark'>
-      <img className='w-4 mr-2 inline-block' src='beach-with-umbrella.png' /> {t('rewards')}!
+    <div className='flex items-center uppercase text-xxs font-bold bg-pt-teal dark:bg-pt-teal px-3 py-1 bg-flashy rounded-full text-pt-purple-dark'>
+      <img className='w-4 mr-2 inline-block' src='/beach-with-umbrella.png' /> {t('rewards')}!
     </div>
   )
 }

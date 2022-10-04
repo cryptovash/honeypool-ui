@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'next-i18next'
 
 export const OddsDisclaimer = (props: {
   textClassName?: string
@@ -9,14 +9,14 @@ export const OddsDisclaimer = (props: {
   const { t } = useTranslation()
   return (
     <span className={classNames(props.textClassName, props.className)}>
-      *<span>{t('Odds Disclaimer')}</span>
+      *<span>{t('oddsDisclaimer')}</span>
       <a
         href='https://docs.pooltogether.com/welcome/faq#prizes-and-winning'
         target='_blank'
         rel='noopener noreferrer'
         className={props.linkClassName}
       >
-        {t('Read More')}
+        {t('readMore')}
       </a>
     </span>
   )

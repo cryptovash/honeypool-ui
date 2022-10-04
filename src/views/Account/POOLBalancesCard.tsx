@@ -1,21 +1,20 @@
-import React, { useMemo } from 'react'
-import FeatherIcon from 'feather-icons-react'
-import { Amount, TokenBalances, TokenWithBalance } from '@pooltogether/hooks'
-import {
-  TokenIconWithNetwork,
-  TokenIcon,
-  PoolIcon,
-  formatBlockExplorerAddressUrl
-} from '@pooltogether/react-components'
-import { useTranslation } from 'react-i18next'
+import { PrizePoolDepositList } from '@components/PrizePoolDepositList'
 import { LoadingList } from '@components/PrizePoolDepositList/LoadingList'
 import { CardTitle } from '@components/Text/CardTitle'
-import { PrizePoolDepositList } from '@components/PrizePoolDepositList'
 import { VotingPromptCard } from '@components/VotingPromptCard'
-import { useUsersPoolTokenBalances } from '@hooks/useUsersPoolTokenBalances'
 import { getExchangeUrl } from '@constants/config'
-import { CHAIN_ID, POOL_TOKEN } from '@constants/misc'
-import { useWalletChainId } from '@pooltogether/wallet-connection'
+import { POOL_TOKEN } from '@constants/misc'
+import { useUsersPoolTokenBalances } from '@hooks/useUsersPoolTokenBalances'
+import { Amount, TokenBalances, TokenWithBalance } from '@pooltogether/hooks'
+import { TokenIconWithNetwork, TokenIcon, PoolIcon } from '@pooltogether/react-components'
+import {
+  CHAIN_ID,
+  formatBlockExplorerAddressUrl,
+  useWalletChainId
+} from '@pooltogether/wallet-connection'
+import FeatherIcon from 'feather-icons-react'
+import { useTranslation } from 'next-i18next'
+import React, { useMemo } from 'react'
 
 export const POOLBalancesCard: React.FC<{ usersAddress: string }> = (props) => {
   const { usersAddress } = props
@@ -37,17 +36,17 @@ export const POOLBalancesCard: React.FC<{ usersAddress: string }> = (props) => {
     return (
       <div className='space-y-2'>
         <div className='flex items-center'>
-          <CardTitle title={('HNYP Token')} loading={!isFetched} />
+          <CardTitle title={t('poolToken', 'POOL Token')} loading={!isFetched} />
         </div>
-        <div className='bg-gradient-to-br from-pt-purple-lighter to-pt-purple-lighter dark:from-pt-purple-lighter dark:to-pt-purple-lighter rounded-lg p-4'>
+        <div className='bg-gradient-to-br from-pt-purple-lightest to-pt-purple-lighter dark:from-pt-purple dark:to-pt-purple-dark rounded-lg p-4'>
           <div className='flex flex-col xs:flex-row justify-between'>
             <div className='flex flex-col'>
               <div className='flex items-center space-x-2'>
                 <PoolIcon />
-                <span className='font-bold'>HNYP</span>
+                <span className='font-bold'>POOL</span>
               </div>
               <span className='text-xxs opacity-50 max-w-xs mt-2'>
-                {t('Share your ideas, make proposals, and vote. The protocol is solely controlled by the HNYP token holders.')}
+                {t('shareIdeasOnPoolTogether')}
               </span>
             </div>
             <a
@@ -60,7 +59,7 @@ export const POOLBalancesCard: React.FC<{ usersAddress: string }> = (props) => {
                   : getExchangeUrl(CHAIN_ID.mainnet, POOL_TOKEN[CHAIN_ID.mainnet])
               }
             >
-              <span>{t('Get HNYP', 'Get HNYP')}</span>
+              <span>{t('getPool', 'Get POOL')}</span>
               <FeatherIcon icon='external-link' className='w-4 h-4 opacity-50' />
             </a>
           </div>
@@ -72,7 +71,7 @@ export const POOLBalancesCard: React.FC<{ usersAddress: string }> = (props) => {
   return (
     <div className='space-y-2'>
       <div className='flex items-center'>
-        <CardTitle title={('HNYP Token')} loading={!isFetched} />
+        <CardTitle title={t('poolToken', 'POOL Token')} loading={!isFetched} />
       </div>
       <POOLBalancesList data={data} isFetched={isFetched} />
       <VotingPromptCard persist />
@@ -128,7 +127,7 @@ const POOLTokenBalanceItem = (props: { chainId: number; token: TokenWithBalance 
       target='_blank'
       rel='noopener noreferrer'
     >
-      <li className='font-semibold transition bg-actually-black bg-opacity-10 dark:bg-actually-black dark:bg-opacity-10 rounded-lg px-4 py-2 w-full flex justify-between items-center'>
+      <li className='font-semibold transition bg-white bg-opacity-70 dark:bg-actually-black dark:bg-opacity-10 rounded-lg px-4 py-2 w-full flex justify-between items-center'>
         <div className='flex space-x-3 items-center'>
           <TokenIconWithNetwork chainId={chainId} address={token.address} />
           <div className='flex flex-col xs:flex-row xs:items-center items-start xs:space-x-2'>

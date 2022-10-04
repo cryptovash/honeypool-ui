@@ -9,7 +9,7 @@ cd ../framer-motion && yarn unlink
 cd ../lodash && yarn unlink
 cd ../tailwindcss && yarn unlink
 cd ../eth-revert-reason && yarn unlink
-# Link Honey Pool Packages
+# Link PoolTogether Packages
 cd ../@pooltogether 
 cd utilities && yarn unlink
 # Back to root

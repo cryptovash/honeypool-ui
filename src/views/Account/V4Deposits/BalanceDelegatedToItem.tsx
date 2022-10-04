@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { BottomSheet, NetworkIcon, TokenIcon } from '@pooltogether/react-components'
-
-import { useTotalAmountDelegatedTo } from '@hooks/v4/PrizePool/useTotalAmountDelegatedTo'
 import { PrizePoolDepositBalance } from '@components/PrizePoolDepositList/PrizePoolDepositBalance'
 import { useSelectedChainId } from '@hooks/useSelectedChainId'
-import { Amount } from '@pooltogether/hooks'
-import { getNetworkNiceNameByChainId } from '@pooltogether/utilities'
 import { useSelectedPrizePoolTicket } from '@hooks/v4/PrizePool/useSelectedPrizePoolTicket'
+import { useTotalAmountDelegatedTo } from '@hooks/v4/PrizePool/useTotalAmountDelegatedTo'
+import { Amount } from '@pooltogether/hooks'
+import { BottomSheet, NetworkIcon, TokenIcon } from '@pooltogether/react-components'
+import { getNetworkNiceNameByChainId } from '@pooltogether/utilities'
+import { useTranslation } from 'next-i18next'
+import React, { useState } from 'react'
 
 // TODO: Bottom sheet for this showing breakdown
 export const BalanceDelegatedToItem: React.FC<{ usersAddress: string }> = (props) => {
@@ -16,12 +15,12 @@ export const BalanceDelegatedToItem: React.FC<{ usersAddress: string }> = (props
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const { chainId } = useSelectedChainId()
-  const { data, isFetched } = useTotalAmountDelegatedTo(usersAddress)
+  const { data, isFetched, isError } = useTotalAmountDelegatedTo(usersAddress)
 
-  if (!isFetched || data.delegatedAmount.amountUnformatted.isZero()) return null
+  if (isError || !isFetched || data?.delegatedAmount.amountUnformatted.isZero()) return null
 
   return (
-    <li className='transition bg-actually-black bg-opacity-10 hover:bg-opacity-20 dark:bg-actually-black dark:bg-opacity-10 dark:hover:bg-opacity-20 rounded-lg'>
+    <li className='transition bg-white bg-opacity-70 hover:bg-opacity-100 dark:bg-actually-black dark:bg-opacity-10 dark:hover:bg-opacity-20 rounded-lg'>
       <button
         className='px-4 py-2 w-full flex justify-between items-center'
         onClick={() => setIsOpen(true)}

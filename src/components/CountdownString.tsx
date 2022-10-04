@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'next-i18next'
 
 interface CountdownStringProps {
   className?: string
@@ -41,15 +41,15 @@ export const CountdownString = (props: CountdownStringProps) => {
       {Boolean(days) && !hideDays && `${days} ${t('lowercaseDay', { count: days })}`}
       {Boolean(hours) && !hideHours && (
         <span className='ml-1'>
-          {hours} {t('hours', { count: hours })}
+          {hours} {t('lowercaseHour', { count: hours })}
         </span>
       )}
       {Boolean(minutes) && !hideMinutes && (
         <span className='ml-1'>
-          {minutes} {t('minutes', { count: minutes })}
+          {minutes} {t('lowercaseMinute', { count: minutes })}
         </span>
       )}
-      {Boolean(seconds) && !hideSeconds && `${seconds} ${t('seconds', { count: seconds })}`}
+      {Boolean(seconds) && !hideSeconds && `${seconds} ${t('lowercaseSecond', { count: seconds })}`}
     </span>
   )
 }

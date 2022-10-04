@@ -1,7 +1,7 @@
 import { useAllProposalsByStatus } from '@pooltogether/hooks'
 import classNames from 'classnames'
 import FeatherIcon from 'feather-icons-react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'next-i18next'
 
 export const VotingPromptCard = (props: { className?: string; persist?: boolean }) => {
   const { className, persist } = props
@@ -18,8 +18,9 @@ export const VotingPromptCard = (props: { className?: string; persist?: boolean 
       className={classNames('hover:opacity-70 transition-opacity block', className)}
       href='https://vote.pooltogether.com/proposals'
       target='_blank'
+      rel='noreferrer'
     >
-      <div className='rounded-lg px-8 py-4 xs:py-2 bg-pt-purple-lighter dark:bg-pt-purple-lighter dark:bg-opacity-40 flex flex-row-reverse xs:flex-row justify-between'>
+      <div className='rounded-lg px-8 py-4 xs:py-2 bg-pt-purple-lightest dark:bg-pt-purple dark:bg-opacity-40 flex flex-row-reverse xs:flex-row justify-between'>
         <span
           className={classNames({
             'text-6xl xs:text-4xl': !noProposals,
@@ -29,7 +30,7 @@ export const VotingPromptCard = (props: { className?: string; persist?: boolean 
           🗳
         </span>
         <div className='xs:ml-2 flex flex-col space-y-1 xs:space-y-0 xs:flex-row xs:justify-between xs:w-full'>
-          <div className='text-pt-purple-dark dark:text-pt-purple-light flex flex-col justify-center space-y-1 leading-none'>
+          <div className='text-pt-purple-dark dark:text-pt-purple-lighter flex flex-col justify-center space-y-1 leading-none'>
             <span className='font-bold'>{t('pooltogetherGovernance')}</span>
             {!noProposals && (
               <span>{t('activeProposalsCount', { count: activeProposalsCount })}</span>

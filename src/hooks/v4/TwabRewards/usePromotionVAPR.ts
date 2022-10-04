@@ -1,12 +1,12 @@
 import { formatUnits } from '@ethersproject/units'
-import { useMemo } from 'react'
-import { sToD } from '@pooltogether/utilities'
+import { useChainPrizePoolTicketTotalSupply } from '@hooks/v4/PrizePool/useChainPrizePoolTicketTotalSupply'
+import { Promotion } from '@interfaces/promotions'
 import { useCoingeckoTokenPrices } from '@pooltogether/hooks'
 import { useToken } from '@pooltogether/hooks'
-
-import { Promotion } from '@interfaces/promotions'
-import { useChainPrizePoolTicketTotalSupply } from '@hooks/v4/PrizePool/useChainPrizePoolTicketTotalSupply'
+import { sToD } from '@pooltogether/utilities'
 import { getPromotionDaysRemaining } from '@utils/v4/TwabRewards/promotionHooks'
+import { useMemo } from 'react'
+import { usePrizePoolByChainId } from '../PrizePool/usePrizePoolByChainId'
 
 // Calculate the variable annual percentage rate for a promotion
 export const usePromotionVAPR = (promotion: Promotion): number => {
@@ -33,8 +33,8 @@ export const usePromotionVAPR = (promotion: Promotion): number => {
     const isReady =
       tokenPricesIsFetched && tokenIsFetched && totalTwabSupply && depositToken?.decimals
 
-    if (daysRemaining > 0 && isReady && tokenPrices) {
-      const promotionTokenUsd = tokenPrices[promotionTokenAddress].usd
+    if (daysRemaining > 0 && isReady && !!tokenPrices) {
+      const promotionTokenUsd = tokenPrices[promotionTokenAddress]?.usd
       const depositTokenUsd = 1 // assume 1 ptaUSDC equals $1 here
 
       const valuePerDay = promotionTokenValuePerDay(
@@ -46,13 +46,23 @@ export const usePromotionVAPR = (promotion: Promotion): number => {
       // Deposit token (typically USDC)
       // Use deposit token decimals and USD value
       const totalValue =
-        Number(formatUnits(totalTwabSupply, depositToken.decimals)) * depositTokenUsd
+        Number(formatUnits(totalTwabSupply.amount.amountUnformatted, depositToken.decimals)) *
+        depositTokenUsd
 
       vapr = (valuePerDay / totalValue) * 365 * 100
     }
 
     return vapr
-  }, [promotion, promotionToken, tokenPrices, totalTwabSupply])
+  }, [
+    depositToken.decimals,
+    promotion,
+    promotionTokenAddress,
+    promotionTokenDecimals,
+    tokenIsFetched,
+    tokenPrices,
+    tokenPricesIsFetched,
+    totalTwabSupply
+  ])
 }
 
 // Rewards token (OP, POOL, etc.)

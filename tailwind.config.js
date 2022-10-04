@@ -1,2 +1,2 @@
-const pooltogetherTheme = require('./src/assets/styles/config.js')
+const pooltogetherTheme = require('@pooltogether/react-components/config')
 module.exports = pooltogetherTheme({})

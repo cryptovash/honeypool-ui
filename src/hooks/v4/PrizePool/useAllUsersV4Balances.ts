@@ -1,10 +1,10 @@
 import { toScaledUsdBigNumber } from '@pooltogether/utilities'
 import { PrizePool } from '@pooltogether/v4-client-js'
+import { getAmountFromBigNumber } from '@utils/getAmountFromBigNumber'
 import { BigNumber } from 'ethers'
 import { useMemo } from 'react'
 import { useQueries } from 'react-query'
-
-import { getAmountFromBigNumber } from '@utils/getAmountFromBigNumber'
+import { useAllTwabDelegations } from '../TwabDelegator/useAllTwabDelegations'
 import { useAllPrizePoolTokens } from './useAllPrizePoolTokens'
 import { usePrizePools } from './usePrizePools'
 import {
@@ -12,7 +12,6 @@ import {
   UsersPrizePoolBalances,
   USERS_PRIZE_POOL_BALANCES_QUERY_KEY
 } from './useUsersPrizePoolBalances'
-import { useAllTwabDelegations } from '../TwabDelegator/useAllTwabDelegations'
 
 export const useAllUsersV4Balances = (usersAddress: string) => {
   const prizePools = usePrizePools()
@@ -22,10 +21,10 @@ export const useAllUsersV4Balances = (usersAddress: string) => {
     prizePools.map((prizePool) => {
       const queryResult = queriesResult?.find((queryResult) => {
         const { data: tokens } = queryResult
-        return tokens.prizePoolId === prizePool.id()
+        return tokens?.prizePoolId === prizePool.id()
       })
       return {
-        queryKey: [USERS_PRIZE_POOL_BALANCES_QUERY_KEY, prizePool.id(), usersAddress],
+        queryKey: [USERS_PRIZE_POOL_BALANCES_QUERY_KEY, prizePool?.id(), usersAddress],
         queryFn: async () => {
           const { data: tokens } = queryResult
           return getUsersPrizePoolBalances(prizePool, usersAddress, tokens)
@@ -71,7 +70,14 @@ export const useAllUsersV4Balances = (usersAddress: string) => {
         totalValueUsdScaled
       }
     }
-  }, [queryResults])
+  }, [
+    delegationData?.delegations,
+    delegationData?.totalTokenWithUsdBalance.balanceUsdScaled,
+    isDelegationsFetched,
+    isDelegationsFetching,
+    queryResults,
+    refetchDelegations
+  ])
 }
 
 const getTotalValueUsdScaled = (

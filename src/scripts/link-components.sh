@@ -11,7 +11,7 @@ cd ../framer-motion && yarn link
 cd ../lodash && yarn link 
 cd ../tailwindcss && yarn link 
 cd ../eth-revert-reason && yarn link
-# Link Honey Pool Packages
+# Link PoolTogether Packages
 cd ../@pooltogether
 cd hooks && yarn link
 cd ../utilities && yarn link

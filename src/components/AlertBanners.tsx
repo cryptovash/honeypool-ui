@@ -1,11 +1,10 @@
-import React from 'react'
-import Link from 'next/link'
-import { useTranslation } from 'react-i18next'
-import { constants } from 'ethers'
-
 import { useAllUsersTicketDelegates } from '@hooks/v4/PrizePool/useAllUsersTicketDelegates'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
 import { useAllUsersV4Balances } from '@hooks/v4/PrizePool/useAllUsersV4Balances'
+import { useUsersAddress } from '@pooltogether/wallet-connection'
+import { constants } from 'ethers'
+import { useTranslation } from 'next-i18next'
+import Link from 'next/link'
+import React from 'react'
 
 export const AlertBanners = () => {
   return <DelegateTicketsBanner />
@@ -44,7 +43,7 @@ const DelegateTicketsBanner = () => {
       <br />
       <Link href='/account#deposits'>
         <a className='font-semibold text-highlight-3 underline'>
-          {t('Activate on the account page')}
+          {t('activateOnTheAccountPage', 'Activate on the account page')}
         </a>
       </Link>
     </div>

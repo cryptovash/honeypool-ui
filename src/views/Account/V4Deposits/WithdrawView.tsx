@@ -1,30 +1,30 @@
-import axios from 'axios'
-import classNames from 'classnames'
-import { SquareButton, SquareButtonTheme } from '@pooltogether/react-components'
-import { useTranslation } from 'react-i18next'
-import { useForm } from 'react-hook-form'
-import { Overrides } from 'ethers'
-import { Amount } from '@pooltogether/hooks'
-import { useState } from 'react'
-import { ModalTitle } from '@pooltogether/react-components'
-import { useTransaction } from '@pooltogether/wallet-connection'
-
-import { useSendTransaction } from '@hooks/useSendTransaction'
+import { StyledInput } from '@components/Input'
+import { Label } from '@components/Label'
 import { ModalTransactionSubmitted } from '@components/Modal/ModalTransactionSubmitted'
-import { WithdrawStepContent } from './WithdrawStepContent'
-import { DepositItemsProps } from '.'
+import { getWithdrawGasLimit } from '@constants/config'
+import { useSendTransaction } from '@hooks/useSendTransaction'
 import { useUsersTotalTwab } from '@hooks/v4/PrizePool/useUsersTotalTwab'
 import { useGetUser } from '@hooks/v4/User/useGetUser'
+import { Amount } from '@pooltogether/hooks'
+import { SquareButton, SquareButtonTheme } from '@pooltogether/react-components'
+import { ModalTitle } from '@pooltogether/react-components'
+import { useTransaction } from '@pooltogether/wallet-connection'
 import { FathomEvent, logEvent } from '@utils/services/fathom'
-import { Label } from '@components/Label'
-import { StyledInput } from '@components/Input'
+import axios from 'axios'
+import classNames from 'classnames'
+import { Overrides } from 'ethers'
+import { useTranslation } from 'next-i18next'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { DepositItemsProps } from '.'
+import { WithdrawStepContent } from './WithdrawStepContent'
 
 const GOOGLE_SHEETS_WITHDRAW_REASON_API_URL = `https://main--pooltogether-google-sheets.netlify.app/.netlify/functions/google`
 
 export enum WithdrawalSteps {
-  input,
-  review,
-  viewTxReceipt
+  input = 'INPUT',
+  review = 'REVIEW',
+  viewTxReceipt = 'VIEW_TX_RECEIPT'
 }
 
 interface WithdrawViewProps extends DepositItemsProps {
@@ -52,7 +52,21 @@ export const WithdrawView = (props: WithdrawViewProps) => {
 
   const sendWithdrawTx = async () => {
     const tokenSymbol = token.symbol
-    const overrides: Overrides = { gasLimit: 750000 }
+    const overrides: Overrides = { gasLimit: getWithdrawGasLimit(prizePool.chainId) }
+
+    // Try to estimate gas
+    // TODO: Move this to v4-client-js for sharability.
+    try {
+      const user = await getUser()
+      const prizePoolContract = user.prizePoolContract
+      const gasEstimate = await prizePoolContract.estimateGas.withdrawFrom(
+        usersAddress,
+        amountToWithdraw.amountUnformatted
+      )
+      overrides.gasLimit = gasEstimate.mul(12).div(10)
+    } catch (e) {
+      console.log('Error estimating gas')
+    }
 
     const txId = await sendTransaction({
       name: `${t('withdraw')} ${amountToWithdraw?.amountPretty} ${tokenSymbol}`,
@@ -65,7 +79,7 @@ export const WithdrawView = (props: WithdrawViewProps) => {
           setCurrentStep(WithdrawalSteps.viewTxReceipt)
           logEvent(FathomEvent.withdrawal)
         },
-        refetch: () => {
+        onSuccess: () => {
           refetchBalances()
           refetchUsersTotalTwab()
         }
@@ -82,9 +96,7 @@ export const WithdrawView = (props: WithdrawViewProps) => {
           chainId={prizePool.chainId}
           title={t('withdrawalSubmitted', 'Withdrawal submitted')}
         />
-
         <ModalTransactionSubmitted className='mt-8' chainId={prizePool.chainId} tx={tx} />
-
         <WithdrawReasonForm />
       </>
     )
@@ -200,7 +212,7 @@ const WithdrawReasonForm = (props) => {
           hidden: !success
         })}
       >
-        <p className='text-sm text-center lg:text-lg my-2 lg:my-8 lg:my-12 text-white w-10/12 lg:w-3/4 m-auto'>
+        <p className='text-sm text-center lg:text-lg my-2 lg:my-8 text-white w-10/12 lg:w-3/4 m-auto'>
           🙂 {t('thanksForTheFeedback')}
         </p>
       </div>

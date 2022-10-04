@@ -1,9 +1,8 @@
+import { formatUnits } from '@ethersproject/units'
+import { useChainPrizePoolTicketTotalSupply } from '@hooks/v4/PrizePool/useChainPrizePoolTicketTotalSupply'
+import { useUsersTotalTwab } from '@hooks/v4/PrizePool/useUsersTotalTwab'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
-import { formatUnits } from '@ethersproject/units'
-
-import { useUsersTotalTwab } from '@hooks/v4/PrizePool/useUsersTotalTwab'
-import { useChainPrizePoolTicketTotalSupply } from '@hooks/v4/PrizePool/useChainPrizePoolTicketTotalSupply'
 
 /**
  * Fetch a user's current percentage of the chain based on their TWAB
@@ -17,7 +16,13 @@ export const useUsersChainTwabPercentage = (chainId: number, usersAddress: strin
 
   return useQuery(
     getUsersChainTwabPercentageKey(chainId, usersAddress),
-    () => getUsersChainTwabPercentage(chainId, totalTwabSupply, usersTwabs, Number(decimals)),
+    () =>
+      getUsersChainTwabPercentage(
+        chainId,
+        totalTwabSupply.amount.amountUnformatted,
+        usersTwabs,
+        Number(decimals)
+      ),
     {
       enabled: isTwabsFetched && Boolean(totalTwabSupply) && Boolean(decimals)
     }

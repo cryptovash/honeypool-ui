@@ -11,11 +11,11 @@ class MyDocument extends Document {
   }
 
   render() {
-    const title = 'Honey Pool'
+    const title = 'PoolTogether'
     const url = `https://pooltogether.com`
     const description = `Deposit to save & win.`
     const keywords = 'ethereum polygon avalanche prize savings win save protocol'
-    const twitterHandle = '@berahoneypool'
+    const twitterHandle = '@PoolTogether_'
 
     return (
       <Html>
@@ -24,11 +24,12 @@ class MyDocument extends Document {
             <title>{title}</title>
 
             <link rel='icon' href='/favicon.png' type='image/x-icon' />
+            <link rel='apple-touch-icon' href='/apple-touch-icon.png' />
 
             <meta name='theme-color' content='#1e0b43' />
             <meta name='description' content={description} />
             <meta name='keywords' content={keywords} />
-            <meta name='author' content='Honey Pool' />
+            <meta name='author' content='PoolTogether' />
 
             <meta property='og:title' content={title} />
             <meta property='og:description' content={description} />
@@ -53,9 +54,8 @@ class MyDocument extends Document {
             />
             <meta property='twitter:url' content={url} />
             <meta property='twitter:creator' content={twitterHandle} />
-
-            <link rel='manifest' href='manifest.json' />
           </>
+          <link rel='manifest' href='/manifest.json' />
         </Head>
         <body className='bg-body text-inverse'>
           <Meta />

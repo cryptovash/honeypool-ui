@@ -1,11 +1,10 @@
-import { useQuery } from 'react-query'
-import { BigNumber } from 'ethers'
 import { formatUnits } from '@ethersproject/units'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
 import { TokenWithAllBalances, useCoingeckoTokenPrices, TokenPrice } from '@pooltogether/hooks'
 import { getRefetchInterval } from '@pooltogether/hooks'
-
+import { useUsersAddress } from '@pooltogether/wallet-connection'
 import { getAmountFromString } from '@utils/getAmountFromString'
+import { BigNumber } from 'ethers'
+import { useQuery } from 'react-query'
 
 interface UsersPromotionData {
   rewardsAmount: Array<string>
@@ -16,7 +15,7 @@ interface UsersPromotionData {
  */
 export const useUsersPromotionAmountClaimable = (
   chainId: number,
-  promotionId: number,
+  promotionId: string,
   usersPromotionData: UsersPromotionData,
   token: TokenWithAllBalances
 ) => {
@@ -37,7 +36,7 @@ export const useUsersPromotionAmountClaimable = (
 
 const getUsersPromotionAmountClaimableKey = (
   chainId: number,
-  promotionId: number,
+  promotionId: string,
   usersAddress: string,
   tokenAddress: string
 ) => ['getUsersPromotionAmountClaimable', chainId, promotionId, usersAddress, tokenAddress]
@@ -52,8 +51,6 @@ export const getUsersPromotionAmountClaimable = async (
   const { decimals, address } = token
   let claimableUnformatted = BigNumber.from(0)
 
-  console.log('here', usersPromotionData.rewardsAmount, claimableUnformatted)
-
   usersPromotionData.rewardsAmount.forEach((numString) => {
     const amountUnformatted = BigNumber.from(numString)
     claimableUnformatted = claimableUnformatted.add(amountUnformatted)
@@ -62,11 +59,10 @@ export const getUsersPromotionAmountClaimable = async (
   const claimableFormatted = formatUnits(claimableUnformatted, decimals)
   const amount = getAmountFromString(claimableFormatted, decimals)
 
-  let usd
+  let usd: number
   if (tokenPrices?.[address]) {
     usd = Number(claimableFormatted) * tokenPrices[address].usd
   }
 
-  console.log('after', claimableUnformatted, claimableFormatted, amount)
   return { amount, usd }
 }

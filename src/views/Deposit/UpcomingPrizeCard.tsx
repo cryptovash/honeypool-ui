@@ -1,19 +1,18 @@
-import React from 'react'
-import classNames from 'classnames'
-import { Trans, useTranslation } from 'react-i18next'
-import { ThemedClipSpinner, CountUp } from '@pooltogether/react-components'
-import { Token } from '@pooltogether/hooks'
-import { PrizeTier } from '@pooltogether/v4-client-js'
-
+import { Time } from '@components/Time'
+import { ViewPrizesSheetCustomTrigger } from '@components/ViewPrizesSheetButton'
+import { useTimeUntil } from '@hooks/useTimeUntil'
 import { usePrizePoolBySelectedChainId } from '@hooks/v4/PrizePool/usePrizePoolBySelectedChainId'
 import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
-import { useDrawBeaconPeriod } from '@hooks/v4/PrizePoolNetwork/useDrawBeaconPeriod'
-import { useTimeUntil } from '@hooks/useTimeUntil'
-import { roundPrizeAmount } from '@utils/roundPrizeAmount'
-import { ViewPrizesSheetCustomTrigger } from '@components/ViewPrizesSheetButton'
 import { useUpcomingPrizeTier } from '@hooks/v4/PrizePool/useUpcomingPrizeTier'
-import { Time } from '@components/Time'
+import { useDrawBeaconPeriod } from '@hooks/v4/PrizePoolNetwork/useDrawBeaconPeriod'
+import { Token } from '@pooltogether/hooks'
+import { ThemedClipSpinner, CountUp } from '@pooltogether/react-components'
+import { PrizeTier } from '@pooltogether/v4-client-js'
 import { calculateTotalNumberOfPrizes } from '@utils/calculateTotalNumberOfPrizes'
+import { roundPrizeAmount } from '@utils/roundPrizeAmount'
+import classNames from 'classnames'
+import { Trans, useTranslation } from 'next-i18next'
+import React from 'react'
 
 export const UpcomingPrizeCard = (props: { className?: string }) => {
   const { className } = props
@@ -48,7 +47,7 @@ const AmountOfPrizes = (props: { isFetched: boolean; ticket: Token; prizeTier: P
   return (
     <div className='uppercase font-semibold text-inverse text-xs xs:text-lg mt-2 mb-1'>
       <Trans
-        i18nKey='Prizes Every Single Day'
+        i18nKey='prizesEverySingleDay'
         components={{
           button: (
             <ViewPrizesSheetCustomTrigger
@@ -80,11 +79,11 @@ const PrizeAmount = (props: { isFetched: boolean; ticket: Token; prizeTier: Priz
   return (
     <h1
       className={classNames(
-        'text-10xl xs:text-13xl xs:-mt-0 font-semibold text-pt-gradient pointer-events-none mx-auto leading-none relative',
+        'text-12xl xs:text-14xl xs:-mt-0 font-semibold text-pt-gradient pointer-events-none mx-auto leading-none relative',
         { 'opacity-50': !amount }
       )}
     >
-      $<CountUp countTo={amount} />
+      $<CountUp countTo={amount} decimals={0} />
       {!amount && <ThemedClipSpinner sizeClassName='w-4 h-4' className='ml-2 absolute bottom-2' />}
     </h1>
   )
@@ -100,10 +99,10 @@ const DrawCountdown = (props) => {
     return (
       <div className='flex flex-col mx-auto'>
         <DrawNumberString>
-          <span>{t('Draw #{{number}}', { number: drawId })}</span>
+          <span>{t('drawNumber', 'Draw #{{number}}', { number: drawId })}</span>
         </DrawNumberString>
         <span className='mt-1 h-14 uppercase font-semibold text-accent-1 text-xl mx-auto'>
-          {t('Closing soon')}
+          {t('closingSoon', 'Closing soon')}
         </span>
       </div>
     )
@@ -112,7 +111,7 @@ const DrawCountdown = (props) => {
   return (
     <div className='flex flex-col mx-auto pt-3'>
       <DrawNumberString>
-        <span>{t('Join draw #{{number}}', { number: drawId })}</span>
+        <span>{t('joinDrawNumber', 'Join draw #{{number}}', { number: drawId })}</span>
       </DrawNumberString>
       <Time
         seconds={secondsLeft}

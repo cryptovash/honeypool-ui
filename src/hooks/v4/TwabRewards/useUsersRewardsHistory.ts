@@ -1,10 +1,10 @@
-import gql from 'graphql-tag'
+import { ClaimedPromotion } from '@interfaces/promotions'
 import { getRefetchInterval } from '@pooltogether/hooks'
-import { GraphQLClient } from 'graphql-request'
-import { useQuery } from 'react-query'
 import { useUsersAddress } from '@pooltogether/wallet-connection'
-
 import { getTwabRewardsSubgraphClient } from '@utils/v4/TwabRewards/getTwabRewardsSubgraphClient'
+import { GraphQLClient } from 'graphql-request'
+import gql from 'graphql-tag'
+import { useQuery } from 'react-query'
 
 /**
  * Fetch an account's
@@ -37,7 +37,12 @@ export const getUsersRewardsHistory = async (
   const query = usersRewardsHistoryQuery()
   const variables = { id: usersAddress.toLowerCase() }
 
-  const rewardsHistoryResponse = await client.request(query, variables).catch((e) => {
+  const rewardsHistoryResponse: {
+    account: {
+      claimedPromotions: ClaimedPromotion[]
+      id: string
+    }
+  } = await client.request(query, variables).catch((e) => {
     console.error(e.message)
     throw e
   })

@@ -1,16 +1,10 @@
-import { useQuery } from 'react-query'
 import { formatUnits } from '@ethersproject/units'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
-import { TokenWithAllBalances, useCoingeckoTokenPrices, TokenPrice } from '@pooltogether/hooks'
-
 import { useUsersChainTwabPercentage } from '@hooks/v4/TwabRewards/useUsersChainTwabPercentage'
+import { Promotion } from '@interfaces/promotions'
+import { TokenWithAllBalances, useCoingeckoTokenPrices, TokenPrice } from '@pooltogether/hooks'
+import { useUsersAddress } from '@pooltogether/wallet-connection'
 import { getAmountFromString } from '@utils/getAmountFromString'
-
-interface Promotion {
-  id: number
-  tokensPerEpoch: string
-  remainingEpochs: number
-}
+import { useQuery } from 'react-query'
 
 /**
  * Get the estimated amount a user will receive for an entire promotion
@@ -45,7 +39,7 @@ export const useUsersPromotionAmountEstimate = (
 
 const getUsersPromotionAmountEstimateKey = (
   chainId: number,
-  promotionId: number,
+  promotionId: string,
   usersAddress: string
 ) => ['getUsersPromotionAmountEstimate', chainId, promotionId, usersAddress]
 

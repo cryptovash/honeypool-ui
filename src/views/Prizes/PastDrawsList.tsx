@@ -1,25 +1,24 @@
-import classNames from 'classnames'
-import FeatherIcon from 'feather-icons-react'
-import { ThemedClipSpinner, Card, Tooltip } from '@pooltogether/react-components'
-import { Amount, Token } from '@pooltogether/hooks'
-import { Draw, PrizeDistribution, PrizeDistributor, PrizePool } from '@pooltogether/v4-client-js'
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-
-import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
-import { useAllPartialDrawDatas } from '@hooks/v4/PrizeDistributor/useAllPartialDrawDatas'
-import { useUsersClaimedAmounts } from '@hooks/v4/PrizeDistributor/useUsersClaimedAmounts'
-import { DrawLock, useDrawLocks } from '@hooks/v4/PrizeDistributor/useDrawLocks'
-import { useTimeUntil } from '@hooks/useTimeUntil'
-import { CountdownString } from '@components/CountdownString'
-import { roundPrizeAmount } from '@utils/roundPrizeAmount'
 import { AmountInPrizes } from '@components/AmountInPrizes'
+import { CountdownString } from '@components/CountdownString'
 import { ViewPrizesSheetCustomTrigger } from '@components/ViewPrizesSheetButton'
-import { getTimestampStringWithTime } from '@utils/getTimestampString'
+import { useTimeUntil } from '@hooks/useTimeUntil'
+import { useAllPartialDrawDatas } from '@hooks/v4/PrizeDistributor/useAllPartialDrawDatas'
+import { DrawLock, useDrawLocks } from '@hooks/v4/PrizeDistributor/useDrawLocks'
+import { useUsersClaimedAmounts } from '@hooks/v4/PrizeDistributor/useUsersClaimedAmounts'
 import { useUsersNormalizedBalances } from '@hooks/v4/PrizeDistributor/useUsersNormalizedBalances'
-import { BigNumber } from 'ethers'
 import { useUsersStoredDrawResults } from '@hooks/v4/PrizeDistributor/useUsersStoredDrawResults'
+import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
+import { Amount, Token } from '@pooltogether/hooks'
+import { ThemedClipSpinner, Card, Tooltip } from '@pooltogether/react-components'
+import { Draw, PrizeDistribution, PrizeDistributor, PrizePool } from '@pooltogether/v4-client-js'
+import { useUsersAddress } from '@pooltogether/wallet-connection'
+import { getTimestampStringWithTime } from '@utils/getTimestampString'
+import { roundPrizeAmount } from '@utils/roundPrizeAmount'
+import classNames from 'classnames'
+import { BigNumber } from 'ethers'
+import FeatherIcon from 'feather-icons-react'
+import { useTranslation } from 'next-i18next'
+import React from 'react'
 
 export const PastDrawsList = (props: {
   prizeDistributor: PrizeDistributor
@@ -126,7 +125,7 @@ const PastPrizeListItem = (props: PastPrizeListItemProps) => {
             <button
               onClick={onClick}
               className={classNames(
-                'flex flex-row justify-between w-full bg-pt-purple-lighter dark:bg-pt-purple-lighter rounded-lg p-4',
+                'flex flex-row justify-between w-full bg-white dark:bg-pt-purple-dark dark:bg-opacity-50 rounded-lg p-4',
                 'hover:shadow-lg hover:bg-opacity-100'
               )}
             >
@@ -161,7 +160,7 @@ const PastPrizeListItem = (props: PastPrizeListItemProps) => {
 
               <FeatherIcon
                 icon='chevron-right'
-                className='text-pt-purple-darker w-6 h-6 ml-2 mb-auto'
+                className='text-pt-purple-lighter w-6 h-6 ml-2 mb-auto'
               />
             </button>
           )
@@ -254,8 +253,8 @@ const ExtraDetailsSection = (props: { className?: string } & PastPrizeListItemPr
   const messageHeightClassName = 'h-6'
 
   if (drawLockCountdown?.secondsLeft) {
-    const { weeks, days, hours, minutes } = drawLockCountdown
-    const thereIsWeeks = weeks > 0
+    const { days, hours, minutes } = drawLockCountdown
+    const thereIsWeeks = false
     const thereIsDays = thereIsWeeks || days > 0
     const thereIsHours = thereIsDays || hours > 0
     const thereIsMinutes = thereIsHours || minutes > 0
@@ -265,9 +264,10 @@ const ExtraDetailsSection = (props: { className?: string } & PastPrizeListItemPr
       >
         <FeatherIcon icon='lock' className='w-4 h-4 my-auto mr-2' />
         <span>
-          {t('Draw #{{number}}', { number: draw.drawId })}{' '}
-          {t('unlocks in')}
+          {t('drawNumber', 'Draw #{{number}}', { number: draw.drawId })}{' '}
+          {t('unlocksIn', 'unlocks in')}
           <CountdownString
+            weeks={0}
             className='ml-1'
             {...drawLockCountdown}
             hideHours={thereIsWeeks}
@@ -283,7 +283,7 @@ const ExtraDetailsSection = (props: { className?: string } & PastPrizeListItemPr
     const { amountPretty } = claimedAmount
     return (
       <div className={classNames(messageHeightClassName, className)}>
-        <span className='text-accent-1'>{t('Claimed')}</span>
+        <span className='text-accent-1'>{t('claimed', 'Claimed')}</span>
         <span className='ml-2 font-bold'>{amountPretty}</span>
         <span className='ml-2 font-bold'>{ticket.symbol}</span>
       </div>
@@ -291,7 +291,7 @@ const ExtraDetailsSection = (props: { className?: string } & PastPrizeListItemPr
   } else if (usersAddress && normalizedBalance && userWasNotEligible) {
     return (
       <div className={classNames(messageHeightClassName, className)}>
-        <span className='text-accent-1 opacity-50'>{t('Not eligible')}</span>
+        <span className='text-accent-1 opacity-50'>{t('notEligible', 'Not eligible')}</span>
       </div>
     )
   } else {

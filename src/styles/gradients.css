@@ -1,0 +1,7 @@
+.dark .bg-body-list-fade {
+  background: linear-gradient(to top, #2d0b5a, 10%, rgba(45, 11, 90, 0));
+}
+
+.light .bg-body-list-fade {
+  background: linear-gradient(to top, #f7f7f7, 10%, rgba(247, 247, 247, 0));
+}

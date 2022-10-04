@@ -1,20 +1,36 @@
 import { APP_ENVIRONMENTS } from '@pooltogether/hooks'
-import { testnet, mainnet } from '@pooltogether/v4-pool-data'
 import { getNetworkNameAliasByChainId } from '@pooltogether/utilities'
-
-import { CHAIN_ID } from '@constants/misc'
+import { testnet, mainnet } from '@pooltogether/v4-pool-data'
+import { CHAIN_ID, getChain } from '@pooltogether/wallet-connection'
 import { Chain } from 'wagmi'
-import { getChain } from '@pooltogether/wallet-connection'
 
 /////////////////////////////////////////////////////////////////////
 // Constants pertaining to the networks and Prize Pools available in the app.
 // When adding a new Prize Pool (or network) to the app, update all of these constants.
 /////////////////////////////////////////////////////////////////////
 
-export const RPC_API_KEYS = {
-  alchemy: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-  etherscan: process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY,
-  infura: process.env.NEXT_PUBLIC_INFURA_ID
+export const RPC_URLS = {
+  // Ethereum
+  [CHAIN_ID.mainnet]: process.env.NEXT_PUBLIC_ETHEREUM_MAINNET_RPC_URL,
+  [CHAIN_ID.rinkeby]: process.env.NEXT_PUBLIC_ETHEREUM_RINKEBY_RPC_URL,
+  [CHAIN_ID.ropsten]: process.env.NEXT_PUBLIC_ETHEREUM_ROPSTEN_RPC_URL,
+  [CHAIN_ID.kovan]: process.env.NEXT_PUBLIC_ETHEREUM_KOVAN_RPC_URL,
+  [CHAIN_ID.goerli]: process.env.NEXT_PUBLIC_ETHEREUM_GOERLI_RPC_URL,
+  // Avalanche
+  [CHAIN_ID.avalanche]: process.env.NEXT_PUBLIC_AVALANCHE_MAINNET_RPC_URL,
+  [CHAIN_ID.fuji]: process.env.NEXT_PUBLIC_AVALANCHE_FUJI_RPC_URL,
+  // Polygon
+  [CHAIN_ID.polygon]: process.env.NEXT_PUBLIC_POLYGON_MAINNET_RPC_URL,
+  [CHAIN_ID.mumbai]: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_RPC_URL,
+  // Optimism
+  [CHAIN_ID.optimism]: process.env.NEXT_PUBLIC_OPTIMISM_MAINNET_RPC_URL,
+  [CHAIN_ID['optimism-goerli']]: process.env.NEXT_PUBLIC_OPTIMISM_GOERLI_RPC_URL,
+  // Arbitrum
+  [CHAIN_ID.arbitrum]: process.env.NEXT_PUBLIC_ARBITRUM_MAINNET_RPC_URL,
+  [CHAIN_ID['arbitrum-goerli']]: process.env.NEXT_PUBLIC_ARBITRUM_GOERLI_RPC_URL,
+  // Celo
+  [CHAIN_ID.celo]: process.env.NEXT_PUBLIC_CELO_MAINNET_RPC_URL,
+  [CHAIN_ID['celo-testnet']]: process.env.NEXT_PUBLIC_CELO_TESTNET_RPC_URL
 }
 
 // NOTE: Should be empty. Add a chain id to hide it in app.
@@ -33,9 +49,9 @@ export const V4_CHAIN_IDS = Object.freeze({
 export const V3_CHAIN_IDS = Object.freeze({
   [APP_ENVIRONMENTS.mainnets]: [
     CHAIN_ID.mainnet,
-    // CHAIN_ID.bsc,
-    // CHAIN_ID.polygon,
-    // CHAIN_ID.celo
+    CHAIN_ID.bsc,
+    CHAIN_ID.polygon,
+    CHAIN_ID.celo
   ].filter((chainId) => !CHAIN_IDS_TO_BLOCK.includes(chainId)),
   [APP_ENVIRONMENTS.testnets]: [CHAIN_ID.goerli, CHAIN_ID.mumbai].filter(
     (chainId) => !CHAIN_IDS_TO_BLOCK.includes(chainId)
@@ -80,13 +96,15 @@ export const DEFAULT_CHAIN_IDS = Object.freeze({
 // Native currency symbols in app
 export const CHAIN_NATIVE_CURRENCY = Object.freeze({
   [CHAIN_ID.optimism]: 'Ξ',
-  // [CHAIN_ID.matic]: 'MATIC',
+  [CHAIN_ID.matic]: 'MATIC',
   [CHAIN_ID.mainnet]: 'Ξ',
-  // [CHAIN_ID.avalanche]: 'AVAX',
+  [CHAIN_ID.avalanche]: 'AVAX',
   [CHAIN_ID['optimism-goerli']]: 'Ξ',
-  // [CHAIN_ID.mumbai]: 'MATIC',
+  [CHAIN_ID.arbitrum]: 'Ξ',
+  [CHAIN_ID['arbitrum-goerli']]: 'Ξ',
+  [CHAIN_ID.mumbai]: 'MATIC',
   [CHAIN_ID.goerli]: 'Ξ',
-  // [CHAIN_ID.fuji]: 'AVAX'
+  [CHAIN_ID.fuji]: 'AVAX'
 })
 
 /**
@@ -120,7 +138,9 @@ const BRIDGE_URLS = Object.freeze({
   [CHAIN_ID.optimism]: [{ url: 'https://app.optimism.io/bridge', title: 'Optimism bridge' }],
   [CHAIN_ID['optimism-goerli']]: [
     { url: 'https://app.optimism.io/bridge', title: 'Optimism bridge' }
-  ]
+  ],
+  [CHAIN_ID.arbitrum]: [{ url: 'https://bridge.arbitrum.io/', title: 'Arbitrum bridge' }],
+  [CHAIN_ID['arbitrum-goerli']]: [{ url: 'https://bridge.arbitrum.io/', title: 'Arbitrum bridge' }]
 })
 
 /**
@@ -144,7 +164,9 @@ const EXCHANGE_URLS = Object.freeze({
     `https://app.uniswap.org/#/swap?chain=mumbai&theme=dark&outputCurrency=${tokenAddress}`,
   [CHAIN_ID.avalanche]: (tokenAddress: string) =>
     `https://traderjoexyz.com/#/trade?outputCurrency=${tokenAddress}`,
-  [CHAIN_ID.fuji]: (tokenAddress: string) => `https://traderjoexyz.com/#/trade`
+  [CHAIN_ID.fuji]: (tokenAddress: string) => `https://traderjoexyz.com/#/trade`,
+  [CHAIN_ID.arbitrum]: (tokenAddress: string) =>
+    `https://app.uniswap.org/#/swap?chain=arbitrum&theme=dark&outputCurrency=${tokenAddress}`
 })
 
 /**
@@ -157,9 +179,64 @@ export const COINBASE_CHAIN_KEYS = Object.freeze({
   // [CHAIN_ID.optimism]: 'optimism',
   [CHAIN_ID.polygon]: 'polygon'
 })
+export const getCoinbaseChainAssets = (chainId: number) => COINBASE_ASSETS[chainId]
 export const COINBASE_ASSETS = Object.freeze({
   [CHAIN_ID.mainnet]: ['ETH', 'USDC'],
   [CHAIN_ID.avalanche]: ['AVAX'],
   [CHAIN_ID.polygon]: ['USDC', 'MATIC'],
   [CHAIN_ID.optimism]: ['USDC', 'ETH']
 })
+
+/**
+ * Subgraphs to query for prizes claimed
+ */
+export const PRIZES_CLAIMED_SUBGRAPH_URIS = {
+  [CHAIN_ID.optimism]: `https://api.thegraph.com/subgraphs/name/pooltogether/optimism-v4-prizes-claimed`,
+  // [CHAIN_ID.arbitrum]: `https://api.thegraph.com/subgraphs/name/pooltogether/arbitrum-v4-prizes-claimed`,
+  [CHAIN_ID.mainnet]: `https://api.thegraph.com/subgraphs/name/pooltogether/mainnet-v4-prizes-claimed`,
+  [CHAIN_ID.polygon]: `https://api.thegraph.com/subgraphs/name/pooltogether/polygon-v4-prizes-claimed`,
+  [CHAIN_ID.avalanche]: `https://api.thegraph.com/subgraphs/name/pooltogether/avalanche-v4-prizes-claimed`,
+  [CHAIN_ID.goerli]: `https://api.thegraph.com/subgraphs/name/pooltogether/goerli-v4-prizes-claimed`,
+  [CHAIN_ID.mumbai]: `https://api.thegraph.com/subgraphs/name/pooltogether/mumbai-v4-prizes-claimed`,
+  [CHAIN_ID.fuji]: `https://api.thegraph.com/subgraphs/name/pooltogether/fuji-v4-prizes-claimed`,
+  [CHAIN_ID[
+    'optimism-goerli'
+  ]]: `https://api.thegraph.com/subgraphs/name/pooltogether/op-goerli-v4-prizes-claimed`,
+  [CHAIN_ID[
+    'arbitrum-goerli'
+  ]]: `https://api.thegraph.com/subgraphs/name/pooltogether/arb-goerli-v4-prizes-claimed`
+}
+
+export const TWAB_REWARDS_SUBGRAPH_URIS = {
+  [CHAIN_ID.optimism]: `https://api.thegraph.com/subgraphs/name/pooltogether/optimism-twab-rewards`,
+  [CHAIN_ID.mainnet]: `https://api.thegraph.com/subgraphs/name/pooltogether/mainnet-twab-rewards`,
+  [CHAIN_ID.polygon]: `https://api.thegraph.com/subgraphs/name/pooltogether/polygon-twab-rewards`,
+  [CHAIN_ID.avalanche]: `https://api.thegraph.com/subgraphs/name/pooltogether/avalanche-twab-rewards`,
+  [CHAIN_ID['optimism-goerli']]:
+    'https://api.thegraph.com/subgraphs/name/pooltogether/optimism-goerli-twab-rewards',
+  [CHAIN_ID.goerli]: 'https://api.thegraph.com/subgraphs/name/pooltogether/goerli-twab-rewards',
+  [CHAIN_ID.mumbai]: 'https://api.thegraph.com/subgraphs/name/pooltogether/mumbai-twab-rewards',
+  [CHAIN_ID.fuji]: 'https://api.thegraph.com/subgraphs/name/pooltogether/fuji-twab-rewards',
+  [CHAIN_ID['arbitrum-goerli']]:
+    'https://api.thegraph.com/subgraphs/name/pooltogether/arbitrum-goerli-twab-rewards'
+}
+
+export const getDepositGasLimit = (chainId: number) => {
+  switch (chainId) {
+    case CHAIN_ID.arbitrum:
+    case CHAIN_ID['arbitrum-goerli']:
+      return 1000000
+    default:
+      return 750000
+  }
+}
+
+export const getWithdrawGasLimit = (chainId: number) => {
+  switch (chainId) {
+    case CHAIN_ID.arbitrum:
+    case CHAIN_ID['arbitrum-goerli']:
+      return 1000000
+    default:
+      return 750000
+  }
+}

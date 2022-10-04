@@ -1,5 +1,3 @@
-import React, { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import { SquareButton, SquareButtonProps } from '@pooltogether/react-components'
 import { getNetworkNiceNameByChainId } from '@pooltogether/utilities'
 import {
@@ -9,6 +7,8 @@ import {
   useIsWalletConnected,
   useIsWalletOnChainId
 } from '@pooltogether/wallet-connection'
+import { useTranslation } from 'next-i18next'
+import React, { useMemo } from 'react'
 import { useSwitchNetwork } from 'wagmi'
 
 export interface TxButtonProps extends SquareButtonProps {
@@ -44,17 +44,28 @@ export const TxButton = (props: TxButtonProps) => {
 
   const [content, onClick] = useMemo(() => {
     if (!isWalletConnected) {
-      return [t('Connect Wallet'), connectWallet]
+      return [t('connectWallet'), connectWallet]
     } else if (status === TransactionStatus.pendingUserConfirmation) {
-      return [t('Confirm In Wallet'), () => null]
+      return [t('confirmInWallet'), () => null]
     } else if (status === TransactionStatus.pendingBlockchainConfirmation) {
-      return [t('Transaction Pending', 'Transaction pending'), () => null]
+      return [t('transactionPending', 'Transaction pending'), () => null]
     } else if (!isWalletOnProperNetwork) {
-      return [t('Connect', { networkName }), () => switchNetwork(chainId)]
+      return [t('connectToNetwork', { networkName }), () => switchNetwork(chainId)]
     } else {
       return [children, _onClick]
     }
-  }, [chainId, state, status, isWalletOnProperNetwork, _onClick])
+  }, [
+    isWalletConnected,
+    status,
+    isWalletOnProperNetwork,
+    t,
+    connectWallet,
+    networkName,
+    switchNetwork,
+    chainId,
+    children,
+    _onClick
+  ])
 
   return (
     <>

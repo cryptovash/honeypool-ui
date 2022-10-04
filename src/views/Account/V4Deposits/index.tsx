@@ -1,43 +1,39 @@
-import { useState } from 'react'
-import { getAddress } from 'ethers/lib/utils'
-import { BigNumber, ethers } from 'ethers'
-import { useSigner } from 'wagmi'
+import { BalanceBottomSheet, ContractLink } from '@components/BalanceBottomSheet'
+import { PrizePoolDepositList } from '@components/PrizePoolDepositList'
+import { LoadingList } from '@components/PrizePoolDepositList/LoadingList'
+import { PrizePoolDepositBalance } from '@components/PrizePoolDepositList/PrizePoolDepositBalance'
+import { PrizePoolDepositListItem } from '@components/PrizePoolDepositList/PrizePoolDepositListItem'
+import { CardTitle } from '@components/Text/CardTitle'
+import { useSelectedChainId } from '@hooks/useSelectedChainId'
+import { useSendTransaction } from '@hooks/useSendTransaction'
+import { useAllUsersV4Balances } from '@hooks/v4/PrizePool/useAllUsersV4Balances'
+import { useTotalAmountDelegatedTo } from '@hooks/v4/PrizePool/useTotalAmountDelegatedTo'
+import { UsersPrizePoolBalances } from '@hooks/v4/PrizePool/useUsersPrizePoolBalances'
+import { useUsersTicketDelegate } from '@hooks/v4/PrizePool/useUsersTicketDelegate'
+import { useAllTwabDelegations } from '@hooks/v4/TwabDelegator/useAllTwabDelegations'
 import {
-  BalanceBottomSheet,
-  ContractLink,
   NetworkIcon,
   SquareButtonSize,
   SquareButtonTheme,
   SquareLink
 } from '@pooltogether/react-components'
-
 import { getNetworkNiceNameByChainId } from '@pooltogether/utilities'
-import { useTranslation } from 'react-i18next'
 import { PrizePool } from '@pooltogether/v4-client-js'
+import { useTransaction, useUsersAddress } from '@pooltogether/wallet-connection'
+import { useIsWalletOnChainId } from '@pooltogether/wallet-connection'
+import { buildApproveTx } from '@utils/transactions/buildApproveTx'
+import { BigNumber, ethers } from 'ethers'
+import { getAddress } from 'ethers/lib/utils'
+import { useTranslation } from 'next-i18next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useTransaction, useUsersAddress } from '@pooltogether/wallet-connection'
-
-import { useSendTransaction } from '@hooks/useSendTransaction'
-import { UsersPrizePoolBalances } from '@hooks/v4/PrizePool/useUsersPrizePoolBalances'
-import { useAllUsersV4Balances } from '@hooks/v4/PrizePool/useAllUsersV4Balances'
-import { useSelectedChainId } from '@hooks/useSelectedChainId'
-import { DelegateTicketsSection } from './DelegateTicketsSection'
-import { CardTitle } from '@components/Text/CardTitle'
+import { useEffect, useMemo, useState } from 'react'
+import { useSigner } from 'wagmi'
 import { BalanceDelegatedToItem } from './BalanceDelegatedToItem'
-import { WithdrawView } from './WithdrawView'
-import { useIsWalletMetamask } from '@hooks/useIsWalletMetamask'
-import { useIsWalletOnChainId } from '@pooltogether/wallet-connection'
-import { LoadingList } from '@components/PrizePoolDepositList/LoadingList'
-import { PrizePoolDepositList } from '@components/PrizePoolDepositList'
-import { PrizePoolDepositListItem } from '@components/PrizePoolDepositList/PrizePoolDepositListItem'
-import { PrizePoolDepositBalance } from '@components/PrizePoolDepositList/PrizePoolDepositBalance'
+import { DelegateTicketsSection } from './DelegateTicketsSection'
 import { DelegateView } from './DelegateView'
-import { useUsersTicketDelegate } from '@hooks/v4/PrizePool/useUsersTicketDelegate'
 import { TwabDelegatorItem } from './TwabDelegatorItem'
-import { useTotalAmountDelegatedTo } from '@hooks/v4/PrizePool/useTotalAmountDelegatedTo'
-import { useAllTwabDelegations } from '@hooks/v4/TwabDelegator/useAllTwabDelegations'
-import { buildApproveTx } from '@utils/transactions/buildApproveTx'
+import { WithdrawView } from './WithdrawView'
 
 export const V4Deposits = () => {
   const { t } = useTranslation()
@@ -48,7 +44,7 @@ export const V4Deposits = () => {
     <div id='deposits'>
       <CardTitle
         className='mb-2'
-        title={t('Deposits')}
+        title={t('deposits')}
         secondary={`$${data?.totalValueUsd.amountPretty}`}
       />
       <DepositsList />
@@ -59,9 +55,11 @@ export const V4Deposits = () => {
 const DepositsList = () => {
   const usersAddress = useUsersAddress()
   const { data, isFetched, refetch } = useAllUsersV4Balances(usersAddress)
+
   if (!isFetched) {
     return <LoadingList />
   }
+
   return (
     <PrizePoolDepositList>
       {data.balances.map((balances) => (
@@ -116,7 +114,6 @@ const DepositItem = (props: DepositItemsProps) => {
       address: balances.token.address
     }
   ]
-  const isWalletMetaMask = useIsWalletMetamask()
   const isWalletOnProperNetwork = useIsWalletOnChainId(chainId)
   const onDismiss = () => setIsOpen(false)
 
@@ -141,6 +138,46 @@ const DepositItem = (props: DepositItemsProps) => {
     return txId
   }
 
+  const views = useMemo(
+    () => [
+      {
+        id: 'withdraw',
+        view: () => (
+          <WithdrawView
+            usersAddress={usersAddress}
+            prizePool={prizePool}
+            balances={balances}
+            setWithdrawTxId={setTxId}
+            onDismiss={onDismiss}
+            refetchBalances={refetchBalances}
+          />
+        ),
+        label: t('withdraw'),
+        theme: SquareButtonTheme.tealOutline
+      }
+    ],
+    []
+  )
+
+  const moreInfoViews = useMemo(
+    () => [
+      {
+        id: 'delegate',
+        view: () => (
+          <DelegateView
+            prizePool={prizePool}
+            balances={balances}
+            refetchBalances={refetchBalances}
+          />
+        ),
+        icon: 'gift',
+        label: t('delegateDeposit', 'Delegate deposit'),
+        theme: SquareButtonTheme.teal
+      }
+    ],
+    []
+  )
+
   return (
     <>
       <PrizePoolDepositListItem
@@ -153,12 +190,14 @@ const DepositItem = (props: DepositItemsProps) => {
         bottom={<DelegateTicketsSection prizePool={prizePool} balance={balances?.ticket} />}
       />
       <BalanceBottomSheet
-        title={t('Deposits', { network: getNetworkNiceNameByChainId(chainId) })}
+        key={'deposit-item-sheet-' + prizePool.id()}
+        title={t('depositsOnNetwork', { network: getNetworkNiceNameByChainId(chainId) })}
         open={isOpen}
         label={`Manage deposits for ${prizePool.id()}`}
         onDismiss={onDismiss}
         chainId={chainId}
         delegate={delegate}
+        transactionHash={tx?.receipt?.transactionHash}
         internalLinks={
           <Link href={{ pathname: '/deposit', query: router.query }}>
             <SquareLink
@@ -166,51 +205,19 @@ const DepositItem = (props: DepositItemsProps) => {
               theme={SquareButtonTheme.teal}
               className='w-full'
             >
-              {t('Deposit')}
+              {t('deposit')}
             </SquareLink>
           </Link>
         }
-        views={[
-          {
-            id: 'Withdraw',
-            view: () => (
-              <WithdrawView
-                usersAddress={usersAddress}
-                prizePool={prizePool}
-                balances={balances}
-                setWithdrawTxId={setTxId}
-                onDismiss={onDismiss}
-                refetchBalances={refetchBalances}
-              />
-            ),
-            label: t('Withdraw'),
-            theme: SquareButtonTheme.tealOutline
-          }
-        ]}
+        views={views}
         sendRevokeAllowanceTransaction={sendRevokeAllowanceTransaction}
-        moreInfoViews={[
-          {
-            id: 'delegate',
-            view: () => (
-              <DelegateView
-                prizePool={prizePool}
-                balances={balances}
-                refetchBalances={refetchBalances}
-              />
-            ),
-            icon: 'gift',
-            label: t('Delegate deposit', 'Delegate deposit'),
-            theme: SquareButtonTheme.teal
-          }
-        ]}
+        moreInfoViews={moreInfoViews}
         ticket={balances.ticket}
         token={balances.token}
         balance={balances.ticket}
         balanceUsd={balances.ticket}
-        t={t}
         contractLinks={contractLinks}
         isWalletOnProperNetwork={isWalletOnProperNetwork}
-        isWalletMetaMask={isWalletMetaMask}
       />
     </>
   )

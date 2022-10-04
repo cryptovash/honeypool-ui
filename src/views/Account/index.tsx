@@ -1,17 +1,16 @@
-import React from 'react'
-
-import { PagePadding } from '@components/Layout/PagePadding'
 import { ConnectWalletCard } from '@components/ConnectWalletCard'
-import { OddsDisclaimer } from './OddsDisclaimer'
-import { V4Deposits } from './V4Deposits'
-import { V3Deposits } from './V3Deposits'
-// import { EarnRewardsCard } from './Rewards/EarnRewardsCard'
-// import { RewardsCard } from './Rewards/RewardsCard'
-import { POOLBalancesCard } from './POOLBalancesCard'
-import { V3StakingCards } from './V3StakingDeposits'
+import { PagePadding } from '@components/Layout/PagePadding'
 import { VotingPromptCard } from '@components/VotingPromptCard'
 import { useIsWalletConnected, useUsersAddress } from '@pooltogether/wallet-connection'
+import React from 'react'
 import { AccountCard } from './AccountCard'
+import { OddsDisclaimer } from './OddsDisclaimer'
+import { POOLBalancesCard } from './POOLBalancesCard'
+import { EarnRewardsCard } from './Rewards/EarnRewardsCard'
+import { RewardsCard } from './Rewards/RewardsCard'
+import { V3Deposits } from './V3Deposits'
+import { V3StakingCards } from './V3StakingDeposits'
+import { V4Deposits } from './V4Deposits'
 
 export const AccountUI = (props) => {
   const isWalletConnected = useIsWalletConnected()
@@ -32,9 +31,9 @@ export const AccountUI = (props) => {
     <PagePadding className='space-y-8'>
       <AccountCard usersAddress={usersAddress} />
       <V4Deposits />
-      {/* <RewardsCard /> */}
+      <RewardsCard />
       <POOLBalancesCard usersAddress={usersAddress} />
-      {/* <EarnRewardsCard /> */}
+      <EarnRewardsCard />
       <V3StakingCards />
       <V3Deposits />
       <OddsDisclaimer className='block mt-6' />

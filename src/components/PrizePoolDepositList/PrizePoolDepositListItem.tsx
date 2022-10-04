@@ -10,9 +10,9 @@ export const PrizePoolDepositListItem: React.FC<{
   return (
     <li
       className={classNames(
-        'transition bg-actually-black bg-opacity-10 dark:bg-actually-black dark:bg-opacity-10 rounded-lg',
+        'transition bg-white bg-opacity-70 dark:bg-actually-black dark:bg-opacity-10 rounded-lg',
         {
-          'hover:bg-opacity-20 dark:hover:bg-opacity-20': !!onClick
+          'hover:bg-opacity-100 dark:hover:bg-opacity-20': !!onClick
         }
       )}
     >

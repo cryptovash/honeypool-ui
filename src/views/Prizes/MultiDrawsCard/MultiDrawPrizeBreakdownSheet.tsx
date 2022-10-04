@@ -1,12 +1,11 @@
-import { ModalProps, BottomSheet } from '@pooltogether/react-components'
-import { Token } from '@pooltogether/hooks'
-import React, { useMemo, useState } from 'react'
-
-import { DrawData } from '../../../interfaces/v4'
-import classNames from 'classnames'
-import { Trans, useTranslation } from 'react-i18next'
-import { PrizeBreakdown } from '@components/PrizeBreakdown'
 import { PrizeWLaurels } from '@components/Images/PrizeWithLaurels'
+import { PrizeBreakdown } from '@components/PrizeBreakdown'
+import { Token } from '@pooltogether/hooks'
+import { ModalProps, BottomSheet } from '@pooltogether/react-components'
+import classNames from 'classnames'
+import { Trans, useTranslation } from 'next-i18next'
+import React, { useMemo, useState } from 'react'
+import { DrawData } from '../../../interfaces/v4'
 
 export const MultiDrawPrizeBreakdownSheet = (
   props: { drawDatas: { [drawId: number]: DrawData }; ticket: Token } & Omit<
@@ -42,7 +41,7 @@ export const MultiDrawPrizeBreakdownSheet = (
       label='Prize breakdown modal'
       className='flex flex-col'
     >
-      <div className='font-semibold uppercase text-pt-purple-dark dark:text-pt-purple-light flex items-center justify-center text-xs mb-6 space-x-2'>
+      <div className='font-semibold uppercase text-pt-purple-dark text-opacity-60 dark:text-pt-purple-lighter flex items-center justify-center text-xs mb-6 space-x-2'>
         <span>{t('prizesFrom', 'Prizes from')}</span>
         <select
           name='drawIds'
@@ -55,7 +54,7 @@ export const MultiDrawPrizeBreakdownSheet = (
         >
           {drawIds.map((drawId) => (
             <option key={drawId} value={drawId}>
-              {t(drawId)}
+              {t('drawNumber', { number: drawId })}
             </option>
           ))}
         </select>
@@ -67,12 +66,19 @@ export const MultiDrawPrizeBreakdownSheet = (
       </div>
 
       <p className='text-accent-1 text-xs text-center'>
-      The number of prizes for each tier is just a target. To learn more about the mechanisms behind this see
-        <a
-          className='text-highlight-1 hover:opacity-70 transition-opacity'
-          href='https://docs.pooltogether.com/welcome/faq#prizes-and-winning'
-          target='_blank'
-          rel='noopener noreferrer'> here.</a>
+        <Trans
+          i18nKey='prizeTierExplainer'
+          components={{
+            a: (
+              <a
+                className='text-highlight-1 hover:opacity-70 transition-opacity'
+                href='https://docs.pooltogether.com/welcome/faq#prizes-and-winning'
+                target='_blank'
+                rel='noopener noreferrer'
+              />
+            )
+          }}
+        />
       </p>
 
       <hr className='opacity-10 border-pt-purple dark:border-white w-80' />

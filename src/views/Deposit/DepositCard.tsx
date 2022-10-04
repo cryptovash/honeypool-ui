@@ -1,24 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { PrizePool } from '@pooltogether/v4-client-js'
-import { useRouter } from 'next/router'
-import { useForm } from 'react-hook-form'
-import { useTranslation } from 'react-i18next'
-import { ethers, Overrides } from 'ethers'
-import { TransactionState, useTransaction } from '@pooltogether/wallet-connection'
 import { SelectAppChainIdModal } from '@components/SelectAppChainIdModal'
-import { getAmountFromString } from '@utils/getAmountFromString'
-import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
+import { getDepositGasLimit } from '@constants/config'
+import { useSelectedChainId } from '@hooks/useSelectedChainId'
+import { useSendTransaction } from '@hooks/useSendTransaction'
 import { usePrizePoolBySelectedChainId } from '@hooks/v4/PrizePool/usePrizePoolBySelectedChainId'
+import { usePrizePoolTokens } from '@hooks/v4/PrizePool/usePrizePoolTokens'
 import { useUsersDepositAllowance } from '@hooks/v4/PrizePool/useUsersDepositAllowance'
 import { useUsersPrizePoolBalances } from '@hooks/v4/PrizePool/useUsersPrizePoolBalances'
-import { useSendTransaction } from '@hooks/useSendTransaction'
-import { DepositConfirmationModal } from '@views/Deposit/DepositConfirmationModal'
-import { DepositForm, DEPOSIT_QUANTITY_KEY } from '@views/Deposit/DepositForm'
 import { useUsersTicketDelegate } from '@hooks/v4/PrizePool/useUsersTicketDelegate'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
 import { useUsersTotalTwab } from '@hooks/v4/PrizePool/useUsersTotalTwab'
 import { useGetUser } from '@hooks/v4/User/useGetUser'
+import { PrizePool } from '@pooltogether/v4-client-js'
+import { useUsersAddress } from '@pooltogether/wallet-connection'
+import { TransactionState, useTransaction } from '@pooltogether/wallet-connection'
+import { getAmountFromString } from '@utils/getAmountFromString'
 import { FathomEvent, logEvent } from '@utils/services/fathom'
+import { DepositConfirmationModal } from '@views/Deposit/DepositConfirmationModal'
+import { DepositForm, DEPOSIT_QUANTITY_KEY } from '@views/Deposit/DepositForm'
+import { ethers, Overrides } from 'ethers'
+import { useTranslation } from 'next-i18next'
+import { useRouter } from 'next/router'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { DepositCardBottomLinks } from './DepositCardBottomLinks'
 
 export const DepositCard = (props: { className?: string }) => {
@@ -144,17 +146,42 @@ export const DepositCard = (props: { className?: string }) => {
 
   const sendDepositTx = async () => {
     const name = `${t('deposit')} ${amountToDeposit.amountPretty} ${token.symbol}`
-    const overrides: Overrides = { gasLimit: 750000 }
-    let contractMethod
+    const overrides: Overrides = { gasLimit: getDepositGasLimit(prizePool.chainId) }
     let callTransaction
+
     if (ticketDelegate === ethers.constants.AddressZero) {
-      contractMethod = 'depositToAndDelegate'
+      // Try to estimate gas
+      // TODO: Move this to v4-client-js for sharability.
+      try {
+        const user = await getUser()
+        const prizePoolContract = user.prizePoolContract
+        const gasEstimate = await prizePoolContract.estimateGas.depositToAndDelegate(
+          usersAddress,
+          amountToDeposit.amountUnformatted,
+          usersAddress
+        )
+        overrides.gasLimit = gasEstimate.mul(12).div(10)
+      } catch (e) {
+        console.log('Error estimating gas')
+      }
       callTransaction = async () => {
         const user = await getUser()
         return user.depositAndDelegate(amountToDeposit.amountUnformatted, usersAddress, overrides)
       }
     } else {
-      contractMethod = 'depositTo'
+      // Try to estimate gas
+      // TODO: Move this to v4-client-js for sharability.
+      try {
+        const user = await getUser()
+        const prizePoolContract = user.prizePoolContract
+        const gasEstimate = await prizePoolContract.estimateGas.depositTo(
+          usersAddress,
+          amountToDeposit.amountUnformatted
+        )
+        overrides.gasLimit = gasEstimate.mul(12).div(10)
+      } catch (e) {
+        console.log('Error estimating gas')
+      }
       callTransaction = async () => {
         const user = await getUser()
         return user.deposit(amountToDeposit.amountUnformatted, overrides)
@@ -205,8 +232,8 @@ export const DepositCard = (props: { className?: string }) => {
     <>
       <div className={className}>
         <div className='font-semibold uppercase flex items-center justify-center text-xs xs:text-sm mb-2 mt-4'>
-          <span className='text-pt-purple-light dark:text-pt-purple-light'>
-            {('Deposit on')}
+          <span className='text-pt-purple-dark text-opacity-60 dark:text-pt-purple-lighter'>
+            {t('depositOn', 'Deposit on')}
           </span>
           <SelectAppChainIdModal className='network-dropdown ml-1 xs:ml-2' />
         </div>
@@ -226,7 +253,7 @@ export const DepositCard = (props: { className?: string }) => {
       </div>
 
       <DepositConfirmationModal
-        chainId={prizePool.chainId}
+        chainId={prizePool?.chainId}
         isOpen={showConfirmModal}
         closeModal={closeModal}
         label='deposit confirmation modal'

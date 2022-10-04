@@ -1,14 +1,13 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { BalanceBottomSheet, ContractLink, SquareButtonTheme } from '@pooltogether/react-components'
-import { useIsWalletOnChainId, useTransaction } from '@pooltogether/wallet-connection'
-
-import { useIsWalletMetamask } from '@hooks/useIsWalletMetamask'
+import { BalanceBottomSheet, ContractLink } from '@components/BalanceBottomSheet'
+import { V3_PRIZE_POOL_ADDRESSES } from '@constants/v3'
 import { V3PrizePoolBalances } from '@hooks/v3/useAllUsersV3Balances'
+import { SquareButtonTheme } from '@pooltogether/react-components'
+import { useIsWalletOnChainId, useTransaction } from '@pooltogether/wallet-connection'
+import { useTranslation } from 'next-i18next'
+import { useMemo, useState } from 'react'
 import { PrizePoolDepositView } from '../V3Deposits/PrizePoolDepositView'
 import { PrizePoolWithdrawView } from '../V3Deposits/PrizePoolWithdrawView'
 import { TokenFaucetClaimView } from '../V3Deposits/TokenFaucetClaimView'
-import { V3_PRIZE_POOL_ADDRESSES } from '@constants/v3'
 
 interface StakingBalanceBottomSheetProps {
   chainId: number
@@ -24,7 +23,6 @@ export const StakingBottomSheet = (props: StakingBalanceBottomSheetProps) => {
   const { t } = useTranslation()
 
   const prizePool = balances.prizePool
-  const isWalletMetaMask = useIsWalletMetamask()
   const isWalletOnProperNetwork = useIsWalletOnChainId(chainId)
 
   const [depositTxId, setDepositTxId] = useState('')
@@ -84,46 +82,49 @@ export const StakingBottomSheet = (props: StakingBalanceBottomSheetProps) => {
     />
   )
 
-  const views = [
-    {
-      id: 'deposit',
-      view: () => depositView,
-      label: t('Deposit'),
-      theme: SquareButtonTheme.teal
-    },
-    {
-      id: 'claim',
-      view: () => claimView,
-      label: t('Rewards'),
-      theme: SquareButtonTheme.rainbow
-    },
-    {
-      id: 'withdraw',
-      view: () => withdrawView,
-      disabled: ticket.amountUnformatted.isZero(),
-      label: t('Withdraw'),
-      theme: SquareButtonTheme.tealOutline
-    }
-  ]
+  const views = useMemo(
+    () => [
+      {
+        id: 'deposit',
+        view: () => depositView,
+        label: t('deposit'),
+        theme: SquareButtonTheme.teal
+      },
+      {
+        id: 'claim',
+        view: () => claimView,
+        label: t('rewards'),
+        theme: SquareButtonTheme.rainbow
+      },
+      {
+        id: 'withdraw',
+        view: () => withdrawView,
+        disabled: ticket.amountUnformatted.isZero(),
+        label: t('withdraw'),
+        theme: SquareButtonTheme.tealOutline
+      }
+    ],
+    []
+  )
 
   const contractLinks: ContractLink[] = [
     {
-      i18nKey: 'Prize Pool',
+      i18nKey: 'prizePool',
       chainId,
       address: prizePool.addresses.prizePool
     },
     {
-      i18nKey: 'Deposit Token',
+      i18nKey: 'depositToken',
       chainId,
       address: prizePool.addresses.token
     },
     {
-      i18nKey: 'Ticket Token',
+      i18nKey: 'ticketToken',
       chainId,
       address: prizePool.addresses.ticket
     },
     {
-      i18nKey: 'Token Faucet',
+      i18nKey: 'tokenFaucet',
       chainId,
       address: tokenFaucetAddress
     }
@@ -131,9 +132,8 @@ export const StakingBottomSheet = (props: StakingBalanceBottomSheetProps) => {
 
   return (
     <BalanceBottomSheet
-      t={t}
       views={views}
-      title={`${t('Manage')}: ${prizePool.tokens.token.symbol}`}
+      title={`${t('manage')}: ${prizePool.tokens.token.symbol}`}
       contractLinks={contractLinks}
       open={isOpen}
       onDismiss={onDismiss}
@@ -145,7 +145,6 @@ export const StakingBottomSheet = (props: StakingBalanceBottomSheetProps) => {
       }
       className='space-y-4'
       isWalletOnProperNetwork={isWalletOnProperNetwork}
-      isWalletMetaMask={isWalletMetaMask}
       chainId={chainId}
       ticket={ticket}
       token={token}

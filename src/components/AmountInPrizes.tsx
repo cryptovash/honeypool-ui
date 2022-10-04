@@ -1,5 +1,5 @@
 import { Amount } from '@pooltogether/hooks'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'next-i18next'
 
 export const AmountInPrizes = (props: {
   amount: Amount
@@ -19,7 +19,7 @@ export const AmountInPrizes = (props: {
   return (
     <div className={className}>
       <span className={numberClassName}>${amountPretty}</span>
-      <span className={textClassName}>{t('in prizes')}</span>
+      <span className={textClassName}>{t('inPrizes', 'in prizes')}</span>
     </div>
   )
 }

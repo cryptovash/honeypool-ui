@@ -1,15 +1,14 @@
-import FeatherIcon from 'feather-icons-react'
-import React, { useState } from 'react'
-import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
-import { ThemedClipSpinner, TokenIcon, BottomSheet } from '@pooltogether/react-components'
+import { useAllUsersClaimedAmountsGraph } from '@hooks/v4/PrizeDistributor/useAllUsersClaimedAmountsGraph'
+import { useUsersTotalClaimedAmountGraph } from '@hooks/v4/PrizeDistributor/useUsersTotalClaimedAmountGraph'
 import { Amount, Token } from '@pooltogether/hooks'
+import { ThemedClipSpinner, TokenIcon, BottomSheet } from '@pooltogether/react-components'
 import { Draw } from '@pooltogether/v4-client-js'
 import { useUsersAddress } from '@pooltogether/wallet-connection'
-
-import { useUsersTotalClaimedAmountGraph } from '@hooks/v4/PrizeDistributor/useUsersTotalClaimedAmountGraph'
-import { useAllUsersClaimedAmountsGraph } from '@hooks/v4/PrizeDistributor/useAllUsersClaimedAmountsGraph'
 import { getTimestampString } from '@utils/getTimestampString'
+import classNames from 'classnames'
+import FeatherIcon from 'feather-icons-react'
+import { useTranslation } from 'next-i18next'
+import React, { useState } from 'react'
 
 export const TotalWinnings: React.FC<{ usersAddress: string }> = (props) => {
   const { usersAddress } = props
@@ -21,7 +20,7 @@ export const TotalWinnings: React.FC<{ usersAddress: string }> = (props) => {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className='p-4 bg-actually-black bg-opacity-10 dark:bg-actually-black dark:bg-opacity-10 hover:bg-actually-black bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-10 rounded-lg flex justify-between font-bold text-inverse transition items-center'
+        className='p-4 bg-white bg-opacity-20 dark:bg-actually-black dark:bg-opacity-10 hover:bg-white dark:hover:bg-white dark:hover:bg-opacity-10 rounded-lg flex justify-between font-bold text-inverse transition items-center'
       >
         <div className='flex items-center font-bold text-xs space-x-2 text-left w-1/2'>
           <span>🎉</span>
@@ -69,7 +68,7 @@ const TotalWinningsSheet = (props: TotalWinningsSheetProps) => {
           <span className='font-bold text-xl mb-1'>
             ${totalClaimedAmount?.amountPretty || '--'}
           </span>
-          <span className='uppercase opacity-50 font-semibold text-xxs'>{t('Total Winnings')}</span>
+          <span className='uppercase opacity-50 font-semibold text-xxs'>{t('totalWinnings')}</span>
         </div>
       </div>
       <PrizesClaimedList />

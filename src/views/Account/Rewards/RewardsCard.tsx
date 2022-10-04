@@ -1,10 +1,20 @@
-import { useMemo, useState } from 'react'
-import Link from 'next/link'
-import FeatherIcon from 'feather-icons-react'
-import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
-import { TransactionResponse } from '@ethersproject/providers'
-import { Trans } from 'react-i18next'
+import { PrizeWLaurels } from '@components/Images/PrizeWithLaurels'
+import { TxButton } from '@components/Input/TxButton'
+import { LoadingList } from '@components/PrizePoolDepositList/LoadingList'
+import { CardTitle } from '@components/Text/CardTitle'
+import { TransactionReceiptButton } from '@components/TransactionReceiptButton'
+import { TwitterIntentButton } from '@components/TwitterIntentButton'
+import { VAPRTooltip } from '@components/VAPRTooltip'
+import { usePrizePoolByChainId } from '@hooks/v4/PrizePool/usePrizePoolByChainId'
+import { useAllChainsFilteredPromotions } from '@hooks/v4/TwabRewards/useAllChainsFilteredPromotions'
+import { usePromotionVAPR } from '@hooks/v4/TwabRewards/usePromotionVAPR'
+import { useUsersCurrentEpochEstimateAccrued } from '@hooks/v4/TwabRewards/useUsersCurrentEpochEstimateAccrued'
+import { useUsersPromotionAmountClaimable } from '@hooks/v4/TwabRewards/useUsersPromotionAmountClaimable'
+import { useUsersPromotionAmountEstimate } from '@hooks/v4/TwabRewards/useUsersPromotionAmountEstimate'
+import { useUsersPromotionRewardsAmount } from '@hooks/v4/TwabRewards/useUsersPromotionRewardsAmount'
+import { useUsersRewardsHistory } from '@hooks/v4/TwabRewards/useUsersRewardsHistory'
+import { ClaimedPromotion, Promotion } from '@interfaces/promotions'
+import { Token, Amount, useToken, useTokenBalance, TokenWithAllBalances } from '@pooltogether/hooks'
 import {
   BottomSheet,
   BottomSheetTitle,
@@ -17,46 +27,36 @@ import {
   SquareButtonSize,
   ExternalLink
 } from '@pooltogether/react-components'
-import { Token, Amount, useToken, useNetworkHexColor } from '@pooltogether/hooks'
 import {
-  useSendTransaction,
-  useUsersAddress,
-  useIsWalletOnChainId,
-  TransactionState,
-  useTransaction,
-  Transaction
-} from '@pooltogether/wallet-connection'
-import {
-  msToS,
   displayPercentage,
   numberWithCommas,
   getNetworkNameAliasByChainId,
   getNetworkNiceNameByChainId,
   sToD
 } from '@pooltogether/utilities'
-import { useSigner } from 'wagmi'
-
-import { ClaimedPromotion, Promotion } from '@interfaces/promotions'
-import { TxButton } from '@components/Input/TxButton'
-import { PrizeWLaurels } from '@components/Images/PrizeWithLaurels'
-import { LoadingList } from '@components/PrizePoolDepositList/LoadingList'
-import { CardTitle } from '@components/Text/CardTitle'
-import { TwitterIntentButton } from '@components/TwitterIntentButton'
-import { TransactionReceiptButton } from '@components/TransactionReceiptButton'
-import { VAPRTooltip } from '@components/VAPRTooltip'
-import { useAllChainsFilteredPromotions } from '@hooks/v4/TwabRewards/useAllChainsFilteredPromotions'
-import { useUsersRewardsHistory } from '@hooks/v4/TwabRewards/useUsersRewardsHistory'
-import { useUsersPromotionRewardsAmount } from '@hooks/v4/TwabRewards/useUsersPromotionRewardsAmount'
-import { useUsersPromotionAmountClaimable } from '@hooks/v4/TwabRewards/useUsersPromotionAmountClaimable'
-import { useUsersPromotionAmountEstimate } from '@hooks/v4/TwabRewards/useUsersPromotionAmountEstimate'
-import { usePrizePoolByChainId } from '@hooks/v4/PrizePool/usePrizePoolByChainId'
-import { getNextRewardIn, getPromotionDaysRemaining } from '@utils/v4/TwabRewards/promotionHooks'
-import { usePromotionVAPR } from '@hooks/v4/TwabRewards/usePromotionVAPR'
-import { getTwabRewardsContract } from '@utils/v4/TwabRewards/getTwabRewardsContract'
-import { loopXTimes } from '@utils/loopXTimes'
+import {
+  useSendTransaction,
+  useUsersAddress,
+  useIsWalletOnChainId,
+  TransactionState,
+  useTransaction,
+  Transaction,
+  getChainColorByChainId
+} from '@pooltogether/wallet-connection'
 import { getAmountFromBigNumber } from '@utils/getAmountFromBigNumber'
-import { capitalizeFirstLetter, transformHexColor } from '@utils/v4/TwabRewards/misc'
-import { useUsersCurrentEpochEstimateAccrued } from '@hooks/v4/TwabRewards/useUsersCurrentEpochEstimateAccrued'
+import { getAmountFromString } from '@utils/getAmountFromString'
+import { loopXTimes } from '@utils/loopXTimes'
+import { getTwabRewardsContract } from '@utils/v4/TwabRewards/getTwabRewardsContract'
+import { capitalizeFirstLetter } from '@utils/v4/TwabRewards/misc'
+import { getNextRewardIn, getPromotionDaysRemaining } from '@utils/v4/TwabRewards/promotionHooks'
+import classNames from 'classnames'
+import FeatherIcon from 'feather-icons-react'
+import { Trans } from 'next-i18next'
+import { useTranslation } from 'next-i18next'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { UseQueryResult } from 'react-query'
+import { useSigner } from 'wagmi'
 
 enum ClaimModalState {
   'FORM',
@@ -82,7 +82,7 @@ export const RewardsCard = () => {
 
   return (
     <div className='flex flex-col space-y-2'>
-      <CardTitle title={t('Rewards')} loading={!isFetched} />
+      <CardTitle title={t('rewards')} loading={!isFetched} />
 
       {!isFetched && (
         <LoadingList
@@ -97,19 +97,34 @@ export const RewardsCard = () => {
         </div>
       )}
 
-      {promotionsQueryResults.map((queryResult) => {
-        const { data } = queryResult || {}
-        const { chainId } = data || {}
-        if (!data?.promotions || data.promotions.length === 0) {
+      {promotionsQueryResults?.map((queryResult) => {
+        if (
+          !queryResult.isFetched ||
+          !queryResult.data?.promotions ||
+          queryResult.data.promotions.length === 0
+        ) {
           return null
         }
-        return <ChainPromotions key={`chain-promotions-${chainId}`} queryResult={queryResult} />
+        return (
+          <ChainPromotions
+            key={`chain-promotions-${queryResult.data.chainId}`}
+            queryResult={queryResult}
+          />
+        )
       })}
     </div>
   )
 }
 
-const ChainPromotions = (props) => {
+const ChainPromotions = (props: {
+  queryResult: UseQueryResult<
+    {
+      chainId: number
+      promotions: Promotion[]
+    },
+    unknown
+  >
+}) => {
   const { queryResult } = props
 
   const { t } = useTranslation()
@@ -117,13 +132,13 @@ const ChainPromotions = (props) => {
   const { data } = queryResult
   const { chainId, promotions } = data || {}
 
-  const backgroundColor = useNetworkHexColor(chainId)
+  const backgroundColor = getChainColorByChainId(chainId)
   const networkName = capitalizeFirstLetter(getNetworkNameAliasByChainId(chainId))
 
   return (
     <div
       className='rounded-xl text-white p-4'
-      style={{ backgroundColor: transformHexColor(backgroundColor), minHeight: 100 }}
+      style={{ backgroundColor: backgroundColor, minHeight: 100 }}
     >
       <div className='flex items-center font-bold mb-4'>
         <NetworkIcon
@@ -131,14 +146,14 @@ const ChainPromotions = (props) => {
           className='mr-2 border border-opacity-30 border-white'
           sizeClassName='w-5 h-5'
         />
-        {t('Honey Party', { networkName })}
+        {t('chainPoolParty', { networkName })}
       </div>
       <PromotionsList chainId={chainId} promotions={promotions} />
     </div>
   )
 }
 
-const PromotionsList = (props) => {
+const PromotionsList = (props: { chainId: number; promotions: Promotion[] }) => {
   const { chainId, promotions } = props
 
   const {
@@ -171,17 +186,26 @@ const PromotionsList = (props) => {
   )
 }
 
-const PromotionRow = (props) => {
+const PromotionRow = (props: {
+  promotion: Promotion
+  chainId: number
+  refetchUsersRewardsHistory: () => void
+  usersClaimedPromotionHistory: ClaimedPromotion
+}) => {
   const { promotion, chainId, refetchUsersRewardsHistory } = props
   const { id, maxCompletedEpochId, token: tokenAddress } = promotion
 
   const { t } = useTranslation()
 
   const [isOpen, setIsOpen] = useState(false)
-
-  const { data: token, isFetched: tokenIsFetched } = useToken(chainId, tokenAddress)
-
   const usersAddress = useUsersAddress()
+
+  const { data: token, isFetched: tokenIsFetched } = useTokenBalance(
+    chainId,
+    usersAddress,
+    tokenAddress
+  )
+
   const prizePool = usePrizePoolByChainId(chainId)
 
   const { data: usersPromotionData, refetch: refetchUsersRewardsAmount } =
@@ -227,7 +251,7 @@ const PromotionRow = (props) => {
             }}
             left={
               <div className='flex items-center font-bold'>
-                <img className='w-5 mr-2 hidden xs:block' src='beach-with-umbrella.png' />{' '}
+                <img className='w-5 mr-2 hidden xs:block' src='/beach-with-umbrella.png' />{' '}
                 {token.symbol}{' '}
               </div>
             }
@@ -291,7 +315,23 @@ const PromotionRow = (props) => {
   )
 }
 
-const ClaimModal = (props) => {
+const ClaimModal = (props: {
+  promotion: Promotion
+  chainId: number
+  refetchUsersRewardsHistory: () => void
+  usersClaimedPromotionHistory: ClaimedPromotion
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  claimableAmount: Amount
+  claimableUsd: number
+  estimateAmount: Amount
+  token: TokenWithAllBalances
+  refetch: () => void
+  usersPromotionData: {
+    rewardsAmount: string[]
+    rewardsAndEpochs: { reward: string; epochId: number }[]
+  }
+}) => {
   const { isOpen, setIsOpen } = props
 
   const [modalState, setModalState] = useState(ClaimModalState.FORM)
@@ -357,7 +397,26 @@ const ClaimModal = (props) => {
   )
 }
 
-const ClaimModalForm = (props) => {
+const ClaimModalForm = (props: {
+  promotion: Promotion
+  chainId: number
+  refetchUsersRewardsHistory: () => void
+  usersClaimedPromotionHistory: ClaimedPromotion
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  claimableAmount: Amount
+  claimableUsd: number
+  estimateAmount: Amount
+  token: TokenWithAllBalances
+  refetch: () => void
+  usersPromotionData: {
+    rewardsAmount: string[]
+    rewardsAndEpochs: { reward: string; epochId: number }[]
+  }
+  transactionPending: boolean
+  setReceiptView: () => void
+  setTxId: (id: string) => void
+}) => {
   const {
     chainId,
     refetch,
@@ -378,9 +437,8 @@ const ClaimModalForm = (props) => {
   const tokenSymbol = symbol
 
   const { value, unit, seconds } = getNextRewardIn(promotion)
-  console.log(promotion)
 
-  const amount = getAmountFromBigNumber(usersClaimedPromotionHistory?.rewards, decimals)
+  const amount = getAmountFromString(usersClaimedPromotionHistory?.rewards, decimals)
 
   const vapr = usePromotionVAPR(promotion)
 
@@ -393,11 +451,11 @@ const ClaimModalForm = (props) => {
     <>
       <RewardsEndInBanner {...props} />
 
-      {userNeedsToDeposit ? (
+      {userNeedsToDeposit && !promotion.isComplete && (
         <>
           <div className='flex flex-col xs:mt-4 mb-2'>
             <div className='font-bold text-lg'>
-              {t('Deposit to earn rewards', 'Deposit to earn rewards')}
+              {t('depositToEarnRewards', 'Deposit to earn rewards')}
             </div>
             <div>
               <Trans
@@ -417,14 +475,16 @@ const ClaimModalForm = (props) => {
               theme={SquareButtonTheme.rainbow}
               className='mt-4 mb-8 flex w-full items-center justify-center'
             >
-              {userIsEarning ? t('Deposit more', 'Deposit more') : t('Deposit', 'Deposit')}
+              {userIsEarning ? t('depositMore', 'Deposit more') : t('deposit', 'Deposit')}
             </SquareLink>
           </div>
         </>
-      ) : (
+      )}
+
+      {!userNeedsToDeposit && !promotion.isComplete && (
         <>
           <div className='flex items-center text-lg xs:mt-4 mb-2'>
-            <span className='font-bold'>{t('Unclaimed rewards', 'Unclaimed rewards')}</span>
+            <span className='font-bold'>{t('unclaimedRewards', 'Unclaimed rewards')}</span>
             <span className='ml-1 opacity-50'>
               {claimableUsd || claimableUsd === 0 ? (
                 <>(${numberWithCommas(claimableUsd)})</>
@@ -435,7 +495,7 @@ const ClaimModalForm = (props) => {
           </div>
           <div className='flex items-center space-x-4'>
             <UnitPanel
-              label={t('Earning', 'Earning', { tokenSymbol })}
+              label={t('earning', 'Earning', { tokenSymbol })}
               chainId={chainId}
               vapr={vapr}
             />
@@ -443,9 +503,9 @@ const ClaimModalForm = (props) => {
             {promotion.epochDuration >= seconds ? (
               <UnitPanel
                 label={
-                  promotion.currentEpochId === promotion.numberOfEpochs
+                  Number(promotion.currentEpochId) === promotion.numberOfEpochs
                     ? 'Rewards end in'
-                    : t('Next Reward', 'Next Reward')
+                    : t('nextReward', 'Next Reward')
                 }
                 chainId={chainId}
                 icon={<span className='mr-1'>🗓️</span>}
@@ -466,7 +526,7 @@ const ClaimModalForm = (props) => {
       )}
 
       {amount.amountPretty && (
-        <div className='flex items-center bg-pt-purple-lightest dark:bg-white dark:bg-opacity-10 rounded-lg mt-2 mb-4 py-2 px-4 font-averta-bold'>
+        <div className='flex items-center bg-pt-purple-lightest dark:bg-white dark:bg-opacity-10 rounded-lg mt-2 mb-4 py-2 px-4 font-bold'>
           <span className='opacity-40 uppercase text-xxs '>{t('claimed', 'Claimed')}: </span>
           <span className='flex items-center'>
             <>
@@ -546,7 +606,7 @@ const RewardsEndInBanner = (props) => {
 
         {days > 1 && (
           <Link href={{ pathname: '/deposit' }}>
-            <a className='uppercase hover:underline transition ml-2 text-pt-teal text-xs font-averta-bold'>
+            <a className='uppercase hover:underline transition ml-2 text-pt-teal text-xs font-bold'>
               {userIsEarning ? t('depositMore', 'Deposit more') : t('deposit', 'Deposit')}
             </a>
           </Link>
@@ -581,17 +641,28 @@ const useRewardsEndInSentence = (promotion, token) => {
   return [daysRemaining, rewardsEndInSentence]
 }
 
-interface ClaimModalReceiptProps {
+const ClaimModalReceipt = (props: {
+  promotion: Promotion
   chainId: number
-  token: Token
+  refetchUsersRewardsHistory: () => void
+  usersClaimedPromotionHistory: ClaimedPromotion
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
   claimableAmount: Amount
   claimableUsd: number
+  estimateAmount: Amount
+  token: TokenWithAllBalances
+  refetch: () => void
+  usersPromotionData: {
+    rewardsAmount: string[]
+    rewardsAndEpochs: { reward: string; epochId: number }[]
+  }
   tx: Transaction
   transactionPending: boolean
-}
-
-const ClaimModalReceipt: React.FC<ClaimModalReceiptProps> = (props) => {
-  const { chainId, token, claimableUsd, claimableAmount, tx, transactionPending } = props
+  onDismiss: () => void
+  setFormView: () => void
+}) => {
+  const { chainId, token, claimableUsd, claimableAmount, tx, transactionPending, onDismiss } = props
   const { t } = useTranslation()
 
   const [cachedClaimableUsd] = useState(claimableUsd)
@@ -622,7 +693,7 @@ const ClaimModalReceipt: React.FC<ClaimModalReceiptProps> = (props) => {
             }
           />
 
-          <div className='flex items-center justify-center w-full bg-actually-black dark:bg-actually-black dark:bg-opacity-10 rounded-xl p-6 my-4 xs:my-8 xs:text-xl font-bold'>
+          <div className='flex items-center justify-center w-full bg-white dark:bg-actually-black dark:bg-opacity-10 rounded-xl p-6 my-4 xs:my-8 xs:text-xl font-bold'>
             <span className='mx-auto flex items-center mt-1'>
               {icon}
               <span className='opacity-70 font-bold mr-2'>{label}</span>
@@ -641,13 +712,13 @@ const ClaimModalReceipt: React.FC<ClaimModalReceiptProps> = (props) => {
         {isOPToken && <OPTokenCTAs />}
 
         <div className='space-y-4'>
-          {!isOPToken && <AccountPageButton {...props} />}
+          {!isOPToken && <AccountPageButton onDismiss={onDismiss} />}
           <TransactionReceiptButton className='w-full' chainId={chainId} tx={tx} />
           <TwitterIntentButton
             url='https://app.pooltogether.com'
-            text={`I just claimed $${numberWithCommas(
-              cachedClaimableUsd
-            )} in rewards from my @pooltogether_ deposit! Join me in saving and winning: `}
+            text={t('rewardsTweet', {
+              amountClaimed: `$${numberWithCommas(cachedClaimableUsd, { precision: 0 })}`
+            })}
           />
         </div>
       </div>
@@ -682,7 +753,7 @@ export const DelegateOPButton = (props) => {
   )
 }
 
-export const AccountPageButton = (props) => {
+export const AccountPageButton = (props: { onDismiss: () => void }) => {
   const { onDismiss } = props
   const { t } = useTranslation()
 
@@ -702,7 +773,7 @@ const UnitPanel = (props) => {
   const { label, amount, icon, unit, value, vapr } = props
 
   return (
-    <div className='flex flex-col dark:bg-actually-black dark:bg-opacity-20 bg-pt-purple-lightest rounded-lg w-full pt-2 pb-3 mb-4 font-averta-bold'>
+    <div className='flex flex-col dark:bg-actually-black dark:bg-opacity-20 bg-pt-purple-lightest rounded-lg w-full pt-2 pb-3 mb-4 font-bold'>
       <span className='mx-auto flex items-center mt-1'>
         {icon}
 
@@ -741,7 +812,7 @@ const BalanceDisplay = (props) => {
       return null
     }
     return numberWithCommas(Number(claimableAmount.amount) + currentEpochEstimateAccrued)
-  }, [claimableAmount?.amount, currentEpochEstimateAccrued])
+  }, [claimableAmount, currentEpochEstimateAccrued])
 
   if (!claimableAmount && currentEpochEstimateAccrued === null) {
     return <ThemedClipSpinner sizeClassName='w-4 h-4' className='opacity-70' />
@@ -750,7 +821,7 @@ const BalanceDisplay = (props) => {
   return (
     <div
       className={classNames('flex items-center leading-none font-bold mr-1', {
-        'opacity-50': balance === 0 || !balance
+        'opacity-50': balance === '0' || !balance
       })}
     >
       {balance || 0}
@@ -769,7 +840,7 @@ const PromotionListItem = (props: PromotionListItemProps) => {
   const { onClick, left, center, right } = props
 
   return (
-    <li className='transition bg-actually-black bg-opacity-10 hover:bg-opacity-20 dark:bg-actually-black dark:bg-opacity-10 dark:hover:bg-opacity-20 rounded-lg'>
+    <li className='transition bg-white bg-opacity-20 hover:bg-opacity-30 dark:bg-actually-black dark:bg-opacity-10 dark:hover:bg-opacity-20 rounded-lg'>
       <button className='px-4 py-2 w-full flex justify-between items-center' onClick={onClick}>
         {left}
         {center}
@@ -826,7 +897,26 @@ interface SubmitTransactionButtonProps {
 /**
  * @param props
  */
-const SubmitTransactionButton: React.FC<SubmitTransactionButtonProps> = (props) => {
+const SubmitTransactionButton = (props: {
+  promotion: Promotion
+  chainId: number
+  refetchUsersRewardsHistory: () => void
+  usersClaimedPromotionHistory: ClaimedPromotion
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  claimableAmount: Amount
+  claimableUsd: number
+  estimateAmount: Amount
+  token: TokenWithAllBalances
+  refetch: () => void
+  usersPromotionData: {
+    rewardsAmount: string[]
+    rewardsAndEpochs: { reward: string; epochId: number }[]
+  }
+  transactionPending: boolean
+  setReceiptView: () => void
+  setTxId: (id: string) => void
+}) => {
   const {
     chainId,
     promotion,
@@ -836,7 +926,8 @@ const SubmitTransactionButton: React.FC<SubmitTransactionButtonProps> = (props) 
     setReceiptView,
     setTxId,
     refetch,
-    usersClaimedPromotionHistory
+    usersClaimedPromotionHistory,
+    usersPromotionData
   } = props
 
   const { id: promotionId, maxCompletedEpochId } = promotion
@@ -850,26 +941,32 @@ const SubmitTransactionButton: React.FC<SubmitTransactionButtonProps> = (props) 
   const sendTransaction = useSendTransaction()
 
   const sendClaimTx = async () => {
-    const epochIds = [...Array(maxCompletedEpochId).keys()].filter(
+    const epochIds = Array.from(Array(maxCompletedEpochId).keys()).filter(
       (completedEpochId) =>
-        !usersClaimedPromotionHistory?.epochs.includes(completedEpochId.toString())
+        !usersClaimedPromotionHistory?.epochs.includes(completedEpochId.toString()) &&
+        usersPromotionData.rewardsAndEpochs.find(
+          (rewardAndEpoch) => rewardAndEpoch.epochId === completedEpochId
+        )?.reward !== '0'
     )
 
     const twabRewardsContract = getTwabRewardsContract(chainId, signer)
-
-    let callTransaction: () => Promise<TransactionResponse>
+    let gasLimit = undefined
 
     try {
-      callTransaction = async () =>
-        twabRewardsContract.claimRewards(usersAddress, promotionId, epochIds)
+      const gasEstimate = await twabRewardsContract.estimateGas.claimRewards(
+        usersAddress,
+        promotionId,
+        epochIds
+      )
+      gasLimit = gasEstimate.mul(12).div(10)
     } catch (e) {
-      console.error(e)
-      return
+      console.error(e.message)
     }
 
     const transactionId = sendTransaction({
       name: `${t('claim')} ${numberWithCommas(claimableAmount.amount)} ${token.symbol}`,
-      callTransaction,
+      callTransaction: () =>
+        twabRewardsContract.claimRewards(usersAddress, promotionId, epochIds, { gasLimit }),
       callbacks: {
         onConfirmedByUser: () => {
           setReceiptView()
@@ -896,7 +993,7 @@ const SubmitTransactionButton: React.FC<SubmitTransactionButtonProps> = (props) 
       className='mt-2 flex w-full items-center justify-center'
       theme={theme}
     >
-      <span className='font-averta-bold'>
+      <span className='font-bold'>
         {t('claim', 'Claim')} {numberWithCommas(claimableAmount?.amount)} {token.symbol}
       </span>
     </TxButton>

@@ -16,16 +16,16 @@
     "jsx": "preserve",
     "paths": {
       "@abis/*": ["./src/abis/*"],
-      "@assets/*": ["./src/assets/*"],
       "@components/*": ["./src/components/*"],
       "@constants/*": ["./src/constants/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@pages/*": ["./src/pages/*"],
       "@interfaces/*": ["./src/interfaces/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@styles/*": ["./src/styles/*"],
       "@utils/*": ["./src/utils/*"],
       "@views/*": ["./src/views/*"]
     }
   },
-  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "node_modules/@pooltogether/react-components/config.js"],
   "exclude": ["node_modules"]
 }

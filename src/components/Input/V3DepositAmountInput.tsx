@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react'
-import classNames from 'classnames'
-import { TokenWithBalance } from '@pooltogether/hooks'
-import { useTranslation } from 'react-i18next'
-import { ThemedClipSpinner, TokenIcon } from '@pooltogether/react-components'
-import { getMaxPrecision, safeParseUnits } from '@pooltogether/utilities'
-import { FieldValues, UseFormReturn } from 'react-hook-form'
-
 import { WalletSvg } from '@components/Icons/SvgComponents'
 import { useMinimumDepositAmount } from '@hooks/v4/PrizePool/useMinimumDepositAmount'
+import { TokenWithBalance } from '@pooltogether/hooks'
+import { ThemedClipSpinner, TokenIcon } from '@pooltogether/react-components'
+import { getMaxPrecision, safeParseUnits } from '@pooltogether/utilities'
 import { useUsersAddress } from '@pooltogether/wallet-connection'
+import classNames from 'classnames'
+import { useTranslation } from 'next-i18next'
+import React, { useEffect } from 'react'
+import { FieldValues, UseFormReturn } from 'react-hook-form'
 
 interface V3DepositAmountInputProps {
   chainId: number
@@ -77,7 +76,7 @@ const GenericDepositInputHeader = (props: GenericDepositInputHeaderProps) => {
   }, [usersAddress, tokenBalance])
 
   return (
-    <div className='flex justify-between text-xs uppercase font-semibold text-pt-purple-light dark:text-pt-purple-light mb-1'>
+    <div className='flex justify-between text-xs uppercase font-semibold text-pt-purple-dark text-opacity-60 dark:text-pt-purple-lighter mb-1'>
       <span className={classNames('')}>{t('amount')}</span>
       {usersAddress && (
         <button
@@ -145,7 +144,7 @@ const Input = (props: InputProps) => {
 
   const pattern = {
     value: /^\d*\.?\d*$/,
-    message: ('Please enter a positve number.')
+    message: t('pleaseEnterAPositiveNumber')
   }
 
   return (
@@ -184,7 +183,7 @@ const useDepositValidationRules = (tokenBalance, ticketBalance) => {
         if (quantityUnformatted && tokenBalance.amountUnformatted.lt(quantityUnformatted))
           return t(
             'insufficientFundsGetTokensBelow',
-            'Insufficient funds. Get or  below.'
+            'Insufficient funds. Get or swap tokens below.'
           )
       }
 

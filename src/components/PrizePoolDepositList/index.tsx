@@ -12,5 +12,5 @@ export const PrizePoolDepositList = (props: {
 )
 
 PrizePoolDepositList.defaultProps = {
-  bgClassName: 'bg-pt-purple-light dark:bg-pt-purple'
+  bgClassName: 'bg-pt-purple-lightest dark:bg-pt-purple'
 }

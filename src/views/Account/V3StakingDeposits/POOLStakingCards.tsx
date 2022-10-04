@@ -1,13 +1,12 @@
-import { TokenIcon } from '@pooltogether/react-components'
-import { useTranslation } from 'react-i18next'
-
-import { StakingCard } from './StakingCard'
-import { useUsersAddress } from '@pooltogether/wallet-connection'
+import { V3PrizePoolBalances } from '@hooks/v3/useAllUsersV3Balances'
+import { useTokenFaucetData } from '@hooks/v3/useTokenFaucetData'
 import { useUsersTokenFaucetRewards } from '@hooks/v3/useUsersTokenFaucetRewards'
 import { useUsersV3POOLPoolBalances } from '@hooks/v3/useUsersV3POOLPoolBalances'
+import { TokenIcon } from '@pooltogether/react-components'
+import { useUsersAddress } from '@pooltogether/wallet-connection'
+import { useTranslation } from 'next-i18next'
 import { getTokenFaucetAddressTokenFaucetAddress } from './StakingBottomSheet'
-import { useTokenFaucetData } from '@hooks/v3/useTokenFaucetData'
-import { V3PrizePoolBalances } from '@hooks/v3/useAllUsersV3Balances'
+import { StakingCard } from './StakingCard'
 
 export const POOLStakingCards = () => {
   const usersAddress = useUsersAddress()
@@ -70,9 +69,9 @@ const POOLStakingCard = (props: { balances: V3PrizePoolBalances; refetch: () => 
       isTokenFaucetRewardsFetched={isTokenFaucetRewardsFetched}
       isTokenFaucetDataFetched={isTokenFaucetDataFetched}
       poolEmoji={'🌡️'}
-      colorFrom={'#79450b'}
-      colorTo={'#79450b'}
-      depositPrompt={t('Deposit HNYP to vote gas free.')}
+      colorFrom={'#46279A'}
+      colorTo={'#9E66FF'}
+      depositPrompt={t('poolPoolDepositDescription')}
     />
   )
 }

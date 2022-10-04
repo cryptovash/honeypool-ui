@@ -1,3 +1,11 @@
+import { TxButton } from '@components/Input/TxButton'
+import { ModalNetworkGate } from '@components/Modal/ModalNetworkGate'
+import { ModalTransactionSubmitted } from '@components/Modal/ModalTransactionSubmitted'
+import { VAPRTooltip } from '@components/VAPRTooltip'
+import { useSendTransaction } from '@hooks/useSendTransaction'
+import { useTokenFaucetData } from '@hooks/v3/useTokenFaucetData'
+import { useUsersTokenFaucetRewards } from '@hooks/v3/useUsersTokenFaucetRewards'
+import { V3PrizePool } from '@hooks/v3/useV3PrizePools'
 import { TokenWithBalance, TokenWithUsdBalance } from '@pooltogether/hooks'
 import {
   ModalTitle,
@@ -6,20 +14,16 @@ import {
   TokenIcon
 } from '@pooltogether/react-components'
 import { displayPercentage } from '@pooltogether/utilities'
-import { useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
-import { useUsersAddress, Transaction } from '@pooltogether/wallet-connection'
-
-import { ModalNetworkGate } from '@components/Modal/ModalNetworkGate'
-import { ModalTransactionSubmitted } from '@components/Modal/ModalTransactionSubmitted'
-import { VAPRTooltip } from '@components/VAPRTooltip'
+import {
+  useUsersAddress,
+  Transaction,
+  TransactionStatus,
+  TransactionState
+} from '@pooltogether/wallet-connection'
 import { useIsWalletOnChainId, useTransaction } from '@pooltogether/wallet-connection'
-import { useSendTransaction } from '@hooks/useSendTransaction'
 import { buildTokenFaucetClaimTx } from '@utils/transactions/buildTokenFaucetClaimTx'
-import { useUsersTokenFaucetRewards } from '@hooks/v3/useUsersTokenFaucetRewards'
-import { V3PrizePool } from '@hooks/v3/useV3PrizePools'
-import { useTokenFaucetData } from '@hooks/v3/useTokenFaucetData'
-import { TxButton } from '@components/Input/TxButton'
+import { Trans, useTranslation } from 'next-i18next'
+import { useState } from 'react'
 import { useSigner } from 'wagmi'
 
 interface TokenFaucetClaimViewProps {
@@ -87,7 +91,11 @@ export const TokenFaucetClaimView = (props: TokenFaucetClaimViewProps) => {
     )
   }
 
-  if (claimTx && claimTx.sent) {
+  if (
+    claimTx &&
+    (claimTx.status === TransactionStatus.pendingBlockchainConfirmation ||
+      claimTx.state === TransactionState.complete)
+  ) {
     return <ClaimClaimingView chainId={chainId} claimTx={claimTx} onDismiss={onDismiss} />
   }
 
@@ -176,7 +184,7 @@ const ClaimMainView = (props: ClaimMainViewProps) => {
         className='mb-4'
       />
 
-      <div className='bg-actually-black dark:bg-actually-black dark:bg-opacity-10 rounded-xl w-full py-6 flex flex-col mb-4'>
+      <div className='bg-white dark:bg-actually-black dark:bg-opacity-10 rounded-xl w-full py-6 flex flex-col mb-4'>
         <h5 className='text-center'>{t('unclaimedRewards', 'Unclaimed rewards')}</h5>
         <span className={'text-3xl mx-auto font-bold leading-none'}>
           {tokenFaucetRewards.amountPretty}
