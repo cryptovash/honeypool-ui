@@ -1,31 +1,50 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
+    "noEmit": false,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ],
     "paths": {
-      "@abis/*": ["./src/abis/*"],
-      "@components/*": ["./src/components/*"],
-      "@constants/*": ["./src/constants/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@interfaces/*": ["./src/interfaces/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@styles/*": ["./src/styles/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@views/*": ["./src/views/*"]
+      "@root/*": ["/*"],
+      "@src/*": ["src/*"],
+      "@public/*": ["public/*"],
+      "@contracts/*": ["contracts/*"],
+      "@lib/*": ["src/lib/*"],
+      "@abi/*": ["src/lib/abi/*"],
+      "@config/*": ["src/lib/config/*"],
+      "@helpers/*": ["src/helpers/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@providers/*": ["src/providers/*"],
+      "@connectors/*": ["src/connectors/*"],
+      "@constants/*": ["src/constants/*"],
+      "@assets/*": ["src/assets/*"],
+      "@components/*": ["src/components/*"],
+      "@containers/*": ["src/containers/*"],
+      "@fields/*": ["src/components/fields/*"],
+      "@forms/*": ["src/componentsforms/*"],
+      "@layout/*": ["src/layout//*"],
+      "@views/*": ["src/views/*"],
+      "@static/*": ["./public/static/*"],
+      "@generated/*": ["./src/__generated__/*"],
+      "@*": ["./src*"]
     }
   },
-  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "node_modules/@pooltogether/react-components/config.js"],
-  "exclude": ["node_modules"]
+  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js", "public"],
+  "exclude": ["node_modules/*"]
 }

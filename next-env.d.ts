@@ -1,5 +1,11 @@
 /// <reference types="next" />
-/// <reference types="next/image-types/global" />
+/// <reference types="next/types/global" />
+import { ethers } from "ethers";
 
-// NOTE: This file should not be edited
-// see https://nextjs.org/docs/basic-features/typescript for more information.
+declare global {
+  interface Window {
+    ethereum?: ethers.providers.ExternalProvider;
+  }
+}
+
+export {};

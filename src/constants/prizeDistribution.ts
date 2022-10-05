@@ -1,1 +1,0 @@
-export const DECIMALS_FOR_DISTRIBUTION_TIERS = '9'

@@ -1,47 +1,47 @@
-const path = require('path');
-const { i18n } = require('./next-i18next.config');
-const { withSentryConfig } = require('@sentry/nextjs');
-
-const sentryWebpackPluginOptions = {
-  // Additional config options for the Sentry Webpack plugin. Keep in mind that
-  // the following options are set automatically, and overriding them is not
-  // recommended:
-  //   release, url, org, project, authToken, configFile, stripPrefix,
-  //   urlPrefix, include, ignore
-
-  silent: true, // Suppresses all logs
-  // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options.
-};
-
-const nextConfig = {
-  i18n,
-  reactStrictMode: true,
-  productionBrowserSourceMaps: true,
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/deposit',
-        permanent: false,
-      }
-    ]
+const path = require("path")
+module.exports = {
+  future: {
+    webpack5: true,
+    strictPostcssConfiguration: true
   },
-  webpack(config, options) {
+  assetPrefix: "/",
+  trailingSlash: true,
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
+  },
+
+  webpack: (config, { webpack }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@abis': path.resolve(__dirname, './src/abis'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@constants': path.resolve(__dirname, './src/constants'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@styles': path.resolve(__dirname, './src/styles'),
-      '@interfaces': path.resolve(__dirname, './src/interfaces'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@views': path.resolve(__dirname, './src/views'),
-    };
-    return config
-  }
-}
+      // Core
+      "@root": path.resolve(__dirname, "./"),
+      "@src": path.resolve(__dirname, "./src"),
+      "@public": path.resolve(__dirname, "./public"),
+      "@contracts": path.resolve(__dirname, "./contracts"),
 
-module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
+      // Library
+      "@helpers": path.resolve(__dirname, "./src/helpers"),
+      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@providers": path.resolve(__dirname, "./src/providers"),
+      "@connectors": path.resolve(__dirname, "./src/connectors"),
+      "@constants": path.resolve(__dirname, "./src/constants"),
+
+      // Interface
+      "@assets": path.resolve(__dirname, "./src/assets"),
+      "@components": path.resolve(__dirname, "./src/components"),
+      "@fields": path.resolve(__dirname, "./src/components/fields"),
+      "@forms": path.resolve(__dirname, "./src/components/forms"),
+      "@views": path.resolve(__dirname, "./src/components/views"),
+      "@layout": path.resolve(__dirname, "./src/layout/"),
+    }
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    })
+    return config
+  },
+}
